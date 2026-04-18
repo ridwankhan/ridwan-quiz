@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Well Do You Know Ridwan? 🎂</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+
+  /* SCREENS */
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* JOIN SCREEN */
+  .join-box { background: #1a1a2e; border-radius: 16px; padding: 40px; max-width: 400px; width: 100%; text-align: center; }
+  .join-box h1 { font-size: 28px; margin-bottom: 8px; }
+  .join-box p { color: #888; margin-bottom: 24px; font-size: 14px; }
+  .join-box input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid #333; background: #0f0f1a; color: #fff; font-size: 16px; margin-bottom: 12px; outline: none; }
+  .join-box input:focus { border-color: #7c3aed; }
+  .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
+  .btn-purple { background: #7c3aed; color: #fff; }
+  .btn-purple:hover { background: #6d28d9; }
+  .btn-green { background: #16a34a; color: #fff; }
+  .btn-green:hover { background: #15803d; }
+  .btn-red { background: #dc2626; color: #fff; }
+  .btn-red:hover { background: #b91c1c; }
+
+  /* WAITING SCREEN */
+  .waiting-box { text-align: center; max-width: 500px; width: 100%; }
+  .waiting-box h2 { font-size: 24px; margin-bottom: 8px; }
+  .waiting-box p { color: #888; margin-bottom: 32px; }
+  .player-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .player-chip { background: #1a1a2e; border: 1px solid #333; border-radius: 999px; padding: 6px 14px; font-size: 13px; }
+
+  /* HOST SCREEN */
+  .host-box { max-width: 800px; width: 100%; }
+  .host-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
+  .q-counter { font-size: 13px; color: #888; }
+  .tier-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.05em; }
+  .tier-easy { background: #1e3a5f; color: #60a5fa; }
+  .tier-medium { background: #3d2a00; color: #fbbf24; }
+  .tier-hard { background: #3d1515; color: #f87171; }
+  .tier-chaos { background: #3d1535; color: #f472b6; }
+  .tier-bonus { background: #1a3d2e; color: #34d399; }
+  .q-text { font-size: 26px; font-weight: 700; margin-bottom: 32px; line-height: 1.3; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
+  .option-btn { padding: 18px; border-radius: 12px; border: 2px solid #333; background: #1a1a2e; color: #fff; font-size: 16px; cursor: pointer; text-align: left; transition: all 0.2s; }
+  .option-btn:hover { border-color: #7c3aed; }
+  .option-btn.correct { background: #14532d; border-color: #16a34a; }
+  .option-btn.wrong { background: #450a0a; border-color: #dc2626; }
+  .option-btn.reveal { background: #14532d; border-color: #16a34a; }
+  .option-label { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 4px; }
+  .host-controls { display: flex; gap: 12px; }
+  .host-controls .btn { flex: 1; }
+  .bonus-notice { background: #1a3d2e; border: 1px solid #16a34a; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #34d399; margin-bottom: 16px; text-align: center; }
+
+  /* ANSWER SCREEN (players) */
+  .answer-box { max-width: 500px; width: 100%; }
+  .answer-box h2 { font-size: 20px; margin-bottom: 8px; color: #888; }
+  .answer-q { font-size: 18px; font-weight: 600; margin-bottom: 24px; line-height: 1.4; }
+  .answer-options { display: flex; flex-direction: column; gap: 10px; }
+  .answer-btn { padding: 16px; border-radius: 12px; border: 2px solid #333; background: #1a1a2e; color: #fff; font-size: 15px; cursor: pointer; text-align: left; transition: all 0.2s; }
+  .answer-btn:hover { border-color: #7c3aed; background: #2d1a5e; }
+  .answer-btn.selected { border-color: #7c3aed; background: #2d1a5e; }
+  .answer-btn.correct { background: #14532d; border-color: #16a34a; }
+  .answer-btn.wrong { background: #450a0a; border-color: #dc2626; }
+  .answer-btn.reveal { background: #14532d; border-color: #16a34a; }
+  .answer-btn:disabled { cursor: default; }
+  .answered-msg { text-align: center; padding: 40px 20px; }
+  .answered-msg h2 { font-size: 24px; margin-bottom: 8px; }
+  .answered-msg p { color: #888; }
+  .score-display { font-size: 48px; font-weight: 700; color: #7c3aed; margin: 16px 0; }
+
+  /* LEADERBOARD */
+  .lb-box { max-width: 600px; width: 100%; }
+  .lb-box h2 { font-size: 28px; font-weight: 700; margin-bottom: 24px; text-align: center; }
+  .lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: #1a1a2e; border-radius: 12px; margin-bottom: 8px; }
+  .lb-rank { font-size: 20px; font-weight: 700; min-width: 32px; }
+  .lb-name { flex: 1; font-size: 16px; }
+  .lb-score { font-size: 18px; font-weight: 700; color: #7c3aed; }
+  .lb-row.top1 { background: #2d2200; border: 1px solid #fbbf24; }
+  .lb-row.top2 { background: #1a1f2e; border: 1px solid #9ca3af; }
+  .lb-row.top3 { background: #2d1a0a; border: 1px solid #d97706; }
+
+  /* END SCREEN */
+  .end-box { text-align: center; max-width: 600px; width: 100%; }
+  .end-box h1 { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
+  .end-box p { color: #888; margin-bottom: 32px; }
+  .cake-msg { font-size: 64px; margin: 24px 0; }
+
+  /* HOST PANEL */
+  .host-panel { position: fixed; top: 16px; right: 16px; background: #1a1a2e; border: 1px solid #333; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #888; z-index: 100; }
+  .host-panel a { color: #7c3aed; cursor: pointer; text-decoration: underline; }
+
+  /* PROGRESS BAR */
+  .progress-wrap { width: 100%; background: #1a1a2e; border-radius: 999px; height: 6px; margin-bottom: 24px; overflow: hidden; }
+  .progress-fill { height: 100%; background: #7c3aed; border-radius: 999px; transition: width 0.4s; }
+
+  .waiting-indicator { display: flex; align-items: center; gap: 8px; color: #888; font-size: 14px; margin-top: 16px; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; animation: pulse 1.5s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.3s; }
+  .dot:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+  .result-badge { display: inline-block; padding: 8px 20px; border-radius: 999px; font-weight: 700; font-size: 16px; margin-bottom: 16px; }
+  .result-correct { background: #14532d; color: #4ade80; }
+  .result-wrong { background: #450a0a; color: #f87171; }
+</style>
+</head>
+<body>
+
+<!-- JOIN SCREEN -->
+<div id="screen-join" class="screen active">
+  <div class="join-box">
+    <div style="font-size:48px;margin-bottom:16px;">🎂</div>
+    <h1>How Well Do You Know Ridwan?</h1>
+    <p>30th Birthday Quiz</p>
+    <input type="text" id="player-name" placeholder="Enter your name" maxlength="20" />
+    <button class="btn btn-purple" onclick="joinGame()">Join Game</button>
+    <div style="margin-top:16px;border-top:1px solid #333;padding-top:16px;">
+      <button class="btn btn-red" onclick="goHost()" style="font-size:13px;padding:10px;">I'm the Host</button>
+    </div>
+  </div>
+</div>
+
+<!-- WAITING SCREEN (players) -->
+<div id="screen-waiting" class="screen">
+  <div class="waiting-box">
+    <div style="font-size:48px;margin-bottom:16px;">👋</div>
+    <h2 id="waiting-name">Hey!</h2>
+    <p>Waiting for the host to start the game...</p>
+    <div class="waiting-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="margin-top:32px;">
+      <p style="font-size:13px;color:#555;margin-bottom:12px;">Players joined:</p>
+      <div class="player-grid" id="player-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANSWER SCREEN (players) -->
+<div id="screen-answer" class="screen">
+  <div class="answer-box">
+    <h2 id="answer-q-num">Question 1</h2>
+    <div class="answer-q" id="answer-q-text"></div>
+    <div class="answer-options" id="answer-options"></div>
+  </div>
+</div>
+
+<!-- ANSWERED SCREEN (players) -->
+<div id="screen-answered" class="screen">
+  <div class="answered-msg">
+    <div class="result-badge" id="result-badge">Locked in!</div>
+    <h2 id="answered-result">Answer locked in!</h2>
+    <p id="answered-sub">Waiting for host to reveal...</p>
+    <div class="score-display" id="my-score">0</div>
+    <p style="color:#888;font-size:14px;">your score</p>
+  </div>
+</div>
+
+<!-- HOST SCREEN -->
+<div id="screen-host" class="screen">
+  <div class="host-box">
+    <div class="progress-wrap"><div class="progress-fill" id="host-progress"></div></div>
+    <div class="host-header">
+      <div class="q-counter" id="host-q-counter">Question 1 of 20</div>
+      <div class="tier-badge tier-easy" id="host-tier-badge">EASY</div>
+    </div>
+    <div id="bonus-notice" class="bonus-notice" style="display:none;">⚡ BONUS ROUND — Double Points!</div>
+    <div class="q-text" id="host-q-text"></div>
+    <div class="options-grid" id="host-options"></div>
+    <div style="font-size:13px;color:#888;margin-bottom:16px;" id="host-answers-count">0 players answered</div>
+    <div class="host-controls">
+      <button class="btn btn-green" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
+      <button class="btn btn-purple" id="next-btn" onclick="nextQuestion()" style="display:none;">Next Question</button>
+    </div>
+  </div>
+</div>
+
+<!-- LEADERBOARD SCREEN -->
+<div id="screen-leaderboard" class="screen">
+  <div class="lb-box">
+    <h2>🏆 Leaderboard</h2>
+    <div id="lb-list"></div>
+    <div style="margin-top:24px;">
+      <button class="btn btn-purple" id="lb-next-btn" onclick="continueFromLeaderboard()">Next Question</button>
+    </div>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="screen-end" class="screen">
+  <div class="end-box">
+    <h1>Happy 30th Ridwan! 🎉</h1>
+    <p>The quiz is over. Here are your final standings.</p>
+    <div id="final-lb"></div>
+    <div class="cake-msg">🎂</div>
+    <p style="font-size:18px;font-weight:600;color:#fbbf24;">Time to cut the cake!</p>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+
+<script>
+// ============================================================
+// PASTE YOUR FIREBASE CONFIG HERE
+// ============================================================
+const firebaseConfig = {
+  apiKey: "AIzaSyAA_vS0Gban2LARCFzS48dTuY_GI6A3MbQ",
+  authDomain: "ridwan-bday-quiz.firebaseapp.com",
+  databaseURL: "https://ridwan-bday-quiz-default-rtdb.firebaseio.com",
+  projectId: "ridwan-bday-quiz",
+  storageBucket: "ridwan-bday-quiz.firebasestorage.app",
+  messagingSenderId: "901691269194",
+  appId: "1:901691269194:web:5c9acd21dae296f4b746b3"
+};
+// ============================================================
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const gameRef = db.ref('game');
+const playersRef = db.ref('players');
+const answersRef = db.ref('answers');
+
+// ============================================================
+// QUESTIONS
+// ============================================================
+const MAIN_QUESTIONS = [
+  { q: "What country was Ridwan born in?", opts: ["USA", "Bangladesh", "Sweden", "Finland"], ans: 2, tier: "easy" },
+  { q: "Which New York borough did Ridwan live in first?", opts: ["Brooklyn", "The Bronx", "Manhattan", "Queens"], ans: 3, tier: "easy" },
+  { q: "What is Ridwan's all-time favorite TV show?", opts: ["Game of Thrones", "Friends", "Breaking Bad", "Succession"], ans: 2, tier: "easy" },
+  { q: "Which football club does Ridwan support?", opts: ["Arsenal", "Liverpool", "Manchester United", "Chelsea FC"], ans: 3, tier: "easy" },
+  { q: "What is Ridwan's drink of choice?", opts: ["Sparkling water", "Sprite Zero", "Coke Zero", "Iced tea"], ans: 2, tier: "easy" },
+  { q: "What anime was Ridwan obsessed with growing up?", opts: ["Naruto", "One Piece", "Dragon Ball", "Yu-Gi-Oh"], ans: 2, tier: "medium" },
+  { q: "What was Ridwan's all-time favorite video game growing up?", opts: ["Call of Duty", "FIFA", "Madden", "NBA 2K"], ans: 1, tier: "medium" },
+  { q: "What is Ridwan's biggest pet peeve?", opts: ["People being late", "Nail biting", "Loud chewing", "Spoilers"], ans: 1, tier: "medium" },
+  { q: "What was Ridwan's first car?", opts: ["Honda Civic", "Toyota Camry", "Nissan Altima", "Ford Focus"], ans: 2, tier: "medium" },
+  { q: "Ridwan is a recent F1 fan — who is his favorite driver?", opts: ["Lewis Hamilton", "Charles Leclerc", "Max Verstappen", "Carlos Sainz"], ans: 2, tier: "medium" },
+  { q: "What does Ridwan love splurging on?", opts: ["Food delivery apps", "Random tech gadgets", "Travel upgrades", "New clothes"], ans: 1, tier: "hard" },
+  { q: "What is Ridwan's second favorite TV show after Breaking Bad?", opts: ["The Bear", "Schitt's Creek", "Abbott Elementary", "Ted Lasso"], ans: 3, tier: "hard" },
+  { q: "Ridwan barely reads — but one book got him back into it. What was it?", opts: ["The Martian", "Project Hail Mary", "Dune", "Dark Matter"], ans: 3, tier: "hard" },
+  { q: "What is Ridwan genuinely scared of?", opts: ["Clowns in the dark", "Flying on planes", "Animals touching him", "Crowded elevators"], ans: 2, tier: "hard" },
+  { q: "What does Ridwan do for an hour every weekend morning after waking up?", opts: ["Make breakfast", "Doom scroll", "Work out", "Watch TV"], ans: 1, tier: "hard" },
+  { q: "What nickname did Ridwan's 6th grade English teacher give him?", opts: ["Ricky", "Moo-Moo", "Dwan", "R-Man"], ans: 1, tier: "chaos" },
+  { q: "What is Ridwan's Discord group called?", opts: ["Toilet Boyz Inc", "Glock Dookie", "Stinky Penguin Gang", "Wet Sock Society"], ans: 1, tier: "chaos" },
+  { q: "Which unexpected song is one of Ridwan's secret favorites?", opts: ["Love Story by Taylor Swift", "Unfaithful by Rihanna", "Love On Top by Beyonce", "Find Your Love by Drake"], ans: 1, tier: "chaos" },
+  { q: "What does Ridwan find absolutely disgusting?", opts: ["Broccoli", "Tomatoes", "Cucumber", "Spinach"], ans: 2, tier: "chaos" },
+  { q: "Ridwan once destroyed someone's expensive camera equipment. How?", opts: ["Dropped it in a pool", "Sat on it", "Put it in the microwave", "Threw it by accident"], ans: 2, tier: "chaos" },
+];
+
+const BONUS_QUESTIONS = [
+  { q: "Ridwan walks into a bar and the music is deafening. What does he do?", opts: ["Asks them to turn it down", "Leaves immediately", "Suffers in silence", "Starts dancing anyway"], ans: 1, tier: "bonus" },
+  { q: "What is Ridwan's phone wallpaper?", opts: ["A Chelsea FC photo", "A sunset from Dubai", "A shot from Project Hail Mary", "Believe sign from Ted Lasso"], ans: 2, tier: "bonus" },
+  { q: "What is Ridwan's favorite cake flavor?", opts: ["Chocolate", "Vanilla", "Carrot", "Red velvet"], ans: 3, tier: "bonus" },
+];
+
+const ALL_QUESTIONS = [...MAIN_QUESTIONS, ...BONUS_QUESTIONS];
+const POINTS_PER_Q = 100;
+const BONUS_MULTIPLIER = 2;
+
+const TIER_LABELS = { easy: "EASY", medium: "MEDIUM", hard: "HARD", chaos: "CHAOS", bonus: "BONUS x2" };
+const TIER_CLASSES = { easy: "tier-easy", medium: "tier-medium", hard: "tier-hard", chaos: "tier-chaos", bonus: "tier-bonus" };
+const OPT_LABELS = ["A", "B", "C", "D"];
+
+// ============================================================
+// STATE
+// ============================================================
+let myName = "";
+let isHost = false;
+let currentQ = 0;
+let myScore = 0;
+let myAnswer = null;
+let revealed = false;
+
+// ============================================================
+// SCREENS
+// ============================================================
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+// ============================================================
+// JOIN
+// ============================================================
+function joinGame() {
+  const name = document.getElementById('player-name').value.trim();
+  if (!name) return alert("Please enter your name!");
+  myName = name;
+  playersRef.child(name.replace(/[.#$/[\]]/g, '_')).set({ name, score: 0, joined: Date.now() });
+  showScreen('waiting');
+  document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
+  listenForPlayers();
+  listenForGameState();
+}
+
+function goHost() {
+  isHost = true;
+  showScreen('host');
+  initHost();
+}
+
+// ============================================================
+// PLAYERS LISTENER
+// ============================================================
+function listenForPlayers() {
+  playersRef.on('value', snap => {
+    const players = snap.val() || {};
+    const grid = document.getElementById('player-grid');
+    if (grid) {
+      grid.innerHTML = '';
+      Object.values(players).forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'player-chip';
+        chip.textContent = p.name;
+        grid.appendChild(chip);
+      });
+    }
+  });
+}
+
+// ============================================================
+// GAME STATE LISTENER (players)
+// ============================================================
+function listenForGameState() {
+  gameRef.on('value', snap => {
+    const state = snap.val();
+    if (!state) return;
+    currentQ = state.currentQ || 0;
+    const q = ALL_QUESTIONS[currentQ];
+    if (!q) return;
+
+    if (state.phase === 'question') {
+      myAnswer = null;
+      revealed = false;
+      showAnswerScreen(currentQ);
+    } else if (state.phase === 'revealed') {
+      revealed = true;
+      showRevealedScreen(currentQ);
+    } else if (state.phase === 'leaderboard') {
+      updateMyScore();
+      showScreen('answered');
+      document.getElementById('answered-result').textContent = "Check the big screen!";
+      document.getElementById('answered-sub').textContent = "Leaderboard time 🏆";
+      document.getElementById('result-badge').textContent = "⏳";
+      document.getElementById('result-badge').className = 'result-badge';
+    } else if (state.phase === 'end') {
+      showScreen('end');
+    }
+  });
+}
+
+function showAnswerScreen(qIndex) {
+  const q = ALL_QUESTIONS[qIndex];
+  document.getElementById('answer-q-num').textContent = qIndex < MAIN_QUESTIONS.length ? `Question ${qIndex + 1} of 20` : `Bonus Question ${qIndex - MAIN_QUESTIONS.length + 1}`;
+  document.getElementById('answer-q-text').textContent = q.q;
+  const opts = document.getElementById('answer-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = OPT_LABELS[i] + ') ' + o;
+    btn.onclick = () => submitAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+  showScreen('answer');
+}
+
+function submitAnswer(i, btn) {
+  if (myAnswer !== null) return;
+  myAnswer = i;
+  document.querySelectorAll('.answer-btn').forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  const key = myName.replace(/[.#$/[\]]/g, '_');
+  answersRef.child(currentQ).child(key).set({ name: myName, answer: i });
+  showScreen('answered');
+  document.getElementById('answered-result').textContent = "Answer locked in!";
+  document.getElementById('answered-sub').textContent = "Waiting for host to reveal...";
+  document.getElementById('result-badge').textContent = "Locked in!";
+  document.getElementById('result-badge').className = 'result-badge';
+  document.getElementById('my-score').textContent = myScore;
+  if (revealed) showRevealedScreen(currentQ);
+}
+
+function showRevealedScreen(qIndex) {
+  const q = ALL_QUESTIONS[qIndex];
+  const isBonus = qIndex >= MAIN_QUESTIONS.length;
+  const pts = isBonus ? POINTS_PER_Q * BONUS_MULTIPLIER : POINTS_PER_Q;
+  const correct = myAnswer === q.ans;
+  if (correct) {
+    myScore += pts;
+    const key = myName.replace(/[.#$/[\]]/g, '_');
+    playersRef.child(key).update({ score: myScore });
+  }
+  showScreen('answered');
+  document.getElementById('answered-result').textContent = correct ? (isBonus ? `+${pts} points! DOUBLE!` : `+${pts} points!`) : "Not quite!";
+  document.getElementById('answered-sub').textContent = correct ? "Correct! 🎉" : `The answer was: ${q.opts[q.ans]}`;
+  document.getElementById('result-badge').textContent = correct ? "✓ Correct!" : "✗ Wrong";
+  document.getElementById('result-badge').className = 'result-badge ' + (correct ? 'result-correct' : 'result-wrong');
+  document.getElementById('my-score').textContent = myScore;
+}
+
+function updateMyScore() {
+  document.getElementById('my-score').textContent = myScore;
+}
+
+// ============================================================
+// HOST
+// ============================================================
+function initHost() {
+  currentQ = 0;
+  gameRef.set({ phase: 'waiting', currentQ: 0 });
+  listenForPlayers();
+  renderHostQuestion();
+  listenForAnswers();
+}
+
+function renderHostQuestion() {
+  const q = ALL_QUESTIONS[currentQ];
+  const isBonus = currentQ >= MAIN_QUESTIONS.length;
+  const total = currentQ < MAIN_QUESTIONS.length ? 20 : 3;
+  const num = currentQ < MAIN_QUESTIONS.length ? currentQ + 1 : currentQ - MAIN_QUESTIONS.length + 1;
+
+  document.getElementById('host-q-counter').textContent = isBonus ? `Bonus ${num} of 3` : `Question ${num} of 20`;
+  document.getElementById('host-tier-badge').textContent = TIER_LABELS[q.tier];
+  document.getElementById('host-tier-badge').className = 'tier-badge ' + TIER_CLASSES[q.tier];
+  document.getElementById('host-q-text').textContent = q.q;
+  document.getElementById('bonus-notice').style.display = isBonus ? 'block' : 'none';
+  document.getElementById('host-progress').style.width = (currentQ / ALL_QUESTIONS.length * 100) + '%';
+
+  const opts = document.getElementById('host-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.id = 'opt-' + i;
+    btn.innerHTML = `<div class="option-label">${OPT_LABELS[i]}</div>${o}`;
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('reveal-btn').style.display = 'block';
+  document.getElementById('next-btn').style.display = 'none';
+  document.getElementById('host-answers-count').textContent = '0 players answered';
+
+  gameRef.update({ phase: 'question', currentQ });
+}
+
+function listenForAnswers() {
+  answersRef.on('value', snap => {
+    const all = snap.val() || {};
+    const qAnswers = all[currentQ] || {};
+    const count = Object.keys(qAnswers).length;
+    const el = document.getElementById('host-answers-count');
+    if (el) el.textContent = count + ' player' + (count !== 1 ? 's' : '') + ' answered';
+  });
+}
+
+function revealAnswer() {
+  const q = ALL_QUESTIONS[currentQ];
+  const opts = document.querySelectorAll('.option-btn');
+  opts.forEach((btn, i) => {
+    if (i === q.ans) btn.classList.add('correct');
+    else btn.classList.add('wrong');
+  });
+  document.getElementById('reveal-btn').style.display = 'none';
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').textContent = currentQ === ALL_QUESTIONS.length - 1 ? 'See Final Results' : 'Show Leaderboard';
+  gameRef.update({ phase: 'revealed' });
+}
+
+function nextQuestion() {
+  if (currentQ === ALL_QUESTIONS.length - 1) {
+    gameRef.update({ phase: 'end' });
+    showEndScreen();
+    return;
+  }
+  gameRef.update({ phase: 'leaderboard' });
+  showLeaderboard(false);
+}
+
+function continueFromLeaderboard() {
+  currentQ++;
+  renderHostQuestion();
+}
+
+function showLeaderboard(isFinal) {
+  showScreen('leaderboard');
+  document.getElementById('lb-next-btn').textContent = isFinal ? 'See Final Results' : 'Next Question';
+  playersRef.orderByChild('score').once('value', snap => {
+    const players = [];
+    snap.forEach(child => players.push(child.val()));
+    players.sort((a, b) => b.score - a.score);
+    const list = document.getElementById('lb-list');
+    list.innerHTML = '';
+    const medals = ['🥇', '🥈', '🥉'];
+    players.slice(0, 10).forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
+      row.innerHTML = `<div class="lb-rank">${medals[i] || (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} pts</div>`;
+      list.appendChild(row);
+    });
+  });
+}
+
+function showEndScreen() {
+  showScreen('end');
+  playersRef.orderByChild('score').once('value', snap => {
+    const players = [];
+    snap.forEach(child => players.push(child.val()));
+    players.sort((a, b) => b.score - a.score);
+    const list = document.getElementById('final-lb');
+    list.innerHTML = '';
+    const medals = ['🥇', '🥈', '🥉'];
+    players.slice(0, 10).forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
+      row.innerHTML = `<div class="lb-rank">${medals[i] || (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} pts</div>`;
+      list.appendChild(row);
+    });
+  });
+}
+
+// Enter key to join
+document.getElementById('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
+</script>
+</body>
+</html>
+HTMLEOF
