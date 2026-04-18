@@ -4,20 +4,28 @@ A multiplayer browser quiz game powered by Firebase Realtime Database. Players j
 
 ---
 
+## Sites
+
+| Page | URL | Who uses it |
+|------|-----|-------------|
+| **Host** | `https://ridwankhan.github.io/ridwan-quiz/index.html` | You (host) — shows QR code lobby, runs the game |
+| **Guest** | `https://ridwankhan.github.io/ridwan-quiz/guest.html` | Everyone else — join and answer on their phone |
+| **Force host override** | `https://ridwankhan.github.io/ridwan-quiz/index.html?forceHost=1` | Use if the host lock gets stuck |
+
+> GitHub Pages must be enabled on this repo for these URLs to work. Go to **Settings → Pages → Source: main branch → / (root)**.
+
+---
+
 ## How to Run the Quiz
 
-### 1. Open the quiz
-Host the `index.html` file anywhere (GitHub Pages, Netlify, local server, etc.) or just open it directly in a browser. All players need access to the same URL.
+### 1. Open the host page
+Open `index.html` on the screen everyone can see (TV, laptop, projector). It shows the QR code and a live list of players as they join.
 
-### 2. Start as host
-- Open the URL on the screen everyone can see (TV, laptop, projector)
-- Click **"I'm the Host"**
-- The host screen shows the current question and an answer count as players respond
+### 2. Players join
+Guests scan the QR code or open `guest.html` on their phone, enter their name, and wait.
 
-### 3. Players join
-- Everyone else opens the same URL on their phone or device
-- They type their name and click **Join Game**
-- They'll see a waiting screen with all joined players listed
+### 3. Start the game
+Once everyone is in, click **Start Game**. The host screen shows the current question and a live answer count.
 
 ### 4. Run the game
 For each question:
