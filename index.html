@@ -339,15 +339,16 @@ playersRef.on('value', snap => {
 // ── START GAME ─────────────────────────────────────────────
 function startGame() {
   currentQ = 0;
-  gameRef.update({ phase: 'question', currentQ: 0 });
   showScreen('host');
-  renderHostQuestion();
+  renderHostQuestion(); // renderHostQuestion writes phase:'question' to Firebase
   listenForAnswers();
 }
 
 // ── RESET ──────────────────────────────────────────────────
 function resetGame() {
   if (!confirm('Reset the game? This will clear all players and scores.')) return;
+  if (lbListener)      { playersRef.off('value', lbListener);   lbListener = null; }
+  if (answersListener) { answersRef.off('value', answersListener); answersListener = null; }
   Promise.all([
     playersRef.remove(),
     answersRef.remove(),
@@ -399,17 +400,25 @@ function listenForAnswers() {
 }
 
 function revealAnswer() {
+  const btn = document.getElementById('reveal-btn');
+  if (btn.disabled) return;
+  btn.disabled = true;
   const q = ALL_QUESTIONS[currentQ];
-  document.querySelectorAll('.option-btn').forEach((btn, i) => {
-    btn.classList.add(i === q.ans ? 'correct' : 'wrong');
+  document.querySelectorAll('.option-btn').forEach((b, i) => {
+    b.classList.add(i === q.ans ? 'correct' : 'wrong');
   });
-  document.getElementById('reveal-btn').style.display = 'none';
-  document.getElementById('next-btn').style.display = 'block';
-  document.getElementById('next-btn').textContent = currentQ === ALL_QUESTIONS.length - 1 ? 'See Final Results' : 'Show Leaderboard';
+  btn.style.display = 'none';
+  const next = document.getElementById('next-btn');
+  next.style.display = 'block';
+  next.disabled = false;
+  next.textContent = currentQ === ALL_QUESTIONS.length - 1 ? 'See Final Results' : 'Show Leaderboard';
   gameRef.update({ phase: 'revealed' });
 }
 
 function nextQuestion() {
+  const btn = document.getElementById('next-btn');
+  if (btn.disabled) return;
+  btn.disabled = true;
   if (currentQ === ALL_QUESTIONS.length - 1) {
     gameRef.update({ phase: 'end' });
     showEndScreen();

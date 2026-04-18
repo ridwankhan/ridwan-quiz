@@ -277,6 +277,8 @@ let myScore  = 0;
 let myAnswer = null;
 let revealed = false;
 let scoredForQ = -1;
+let gameListener    = null;
+let playersListener = null;
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -288,20 +290,22 @@ function joinGame() {
   if (!name) return alert("Please enter your name!");
   myName = name;
   const key = name.replace(/[.#$/[\]]/g, '_');
+  // Restore score first, then start listening — prevents race condition
   playersRef.child(key).once('value', snap => {
     const existing = snap.val();
     myScore = existing ? (existing.score || 0) : 0;
     scoredForQ = -1;
     playersRef.child(key).set({ name, score: myScore, joined: existing ? existing.joined : Date.now() });
+    showScreen('waiting');
+    document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
+    listenForPlayers();
+    listenForGameState();
   });
-  showScreen('waiting');
-  document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
-  listenForPlayers();
-  listenForGameState();
 }
 
 function listenForPlayers() {
-  playersRef.on('value', snap => {
+  if (playersListener) playersRef.off('value', playersListener);
+  playersListener = playersRef.on('value', snap => {
     const players = snap.val() || {};
     const grid = document.getElementById('player-grid');
     if (!grid) return;
@@ -316,10 +320,21 @@ function listenForPlayers() {
 }
 
 function listenForGameState() {
-  gameRef.on('value', snap => {
+  if (gameListener) gameRef.off('value', gameListener);
+  gameListener = gameRef.on('value', snap => {
     const state = snap.val();
     if (!state) return;
     currentQ = state.currentQ || 0;
+
+    if (state.phase === 'waiting') {
+      // Host reset — send players back to join screen
+      myName = ''; myScore = 0; myAnswer = null; revealed = false; scoredForQ = -1;
+      if (gameListener)    { gameRef.off('value', gameListener);      gameListener = null; }
+      if (playersListener) { playersRef.off('value', playersListener); playersListener = null; }
+      showScreen('join');
+      return;
+    }
+
     if (!ALL_QUESTIONS[currentQ]) return;
 
     if (state.phase === 'question') {
@@ -398,22 +413,25 @@ function showRevealedScreen(qIndex) {
 
 function showEndScreen() {
   showScreen('end');
-  playersRef.orderByChild('score').once('value', snap => {
+  playersRef.once('value', snap => {
     const players = [];
     snap.forEach(child => players.push(child.val()));
-    players.sort((a, b) => b.score - a.score);
+    players.sort((a, b) => {
+      const diff = Number(b.score) - Number(a.score);
+      return diff !== 0 ? diff : a.name.localeCompare(b.name);
+    });
     const list = document.getElementById('final-lb');
     list.innerHTML = '';
-    const leader = players[0] ? players[0].score : 0;
-    players.slice(0, 35).forEach((p, i) => {
-      const cls = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
-      const gap = i === 0 ? 'LEADER' : '-' + (leader - p.score) + ' PTS';
-      const row = document.createElement('div');
-      row.className = 'lb-row' + cls;
-      const pos   = document.createElement('div'); pos.className   = 'lb-pos';  pos.textContent  = 'P' + (i + 1);
-      const name  = document.createElement('div'); name.className  = 'lb-name'; name.textContent = p.name;
-      const pts   = document.createElement('div'); pts.className   = 'lb-pts';  pts.textContent  = p.score;
-      const gapEl = document.createElement('div'); gapEl.className = 'lb-gap';  gapEl.textContent= gap;
+    const leaderScore = players.length ? Number(players[0].score) : 0;
+    players.forEach((p, i) => {
+      const score = Number(p.score);
+      const cls   = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
+      const gap   = i === 0 ? 'LEADER' : '-' + (leaderScore - score) + ' PTS';
+      const row   = document.createElement('div'); row.className  = 'lb-row' + cls;
+      const pos   = document.createElement('div'); pos.className  = 'lb-pos';  pos.textContent  = 'P' + (i + 1);
+      const name  = document.createElement('div'); name.className = 'lb-name'; name.textContent = p.name;
+      const pts   = document.createElement('div'); pts.className  = 'lb-pts';  pts.textContent  = score;
+      const gapEl = document.createElement('div'); gapEl.className= 'lb-gap';  gapEl.textContent= gap;
       row.append(pos, name, pts, gapEl);
       list.appendChild(row);
     });
