@@ -198,16 +198,38 @@
   .result-correct { background: #0a2e18; color: #4ade80; border: 1px solid var(--green); }
   .result-wrong   { background: #2e0a0a; color: #f87171; border: 1px solid #dc2626; }
 
-  /* LEADERBOARD */
-  .lb-box { max-width: 620px; width: 100%; }
-  .lb-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 900; margin-bottom: 24px; text-align: center; letter-spacing: 0.05em; }
-  .lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
-  .lb-rank { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; min-width: 32px; }
-  .lb-name  { flex: 1; font-size: 16px; font-weight: 600; }
-  .lb-score { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: var(--gold); }
-  .lb-row.top1 { background: #1a1400; border-color: var(--gold); }
-  .lb-row.top2 { background: #111520; border-color: var(--silver); }
-  .lb-row.top3 { background: #1a0f00; border-color: var(--bronze); }
+  /* LEADERBOARD — F1 timing tower */
+  .lb-box { max-width: 660px; width: 100%; }
+  .lb-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; margin-bottom: 4px; text-align: center; letter-spacing: 0.2em; color: var(--muted); }
+  .lb-header { display: flex; align-items: center; padding: 6px 12px 6px 48px; font-family: 'Orbitron', monospace; font-size: 10px; color: var(--muted); letter-spacing: 0.12em; margin-bottom: 4px; gap: 0; }
+  .lb-header .lbh-name  { flex: 1; }
+  .lb-header .lbh-pts   { width: 90px; text-align: right; }
+  .lb-header .lbh-gap   { width: 80px; text-align: right; }
+  .lb-row {
+    display: flex; align-items: center;
+    background: #0d0d1a;
+    border-left: 4px solid var(--muted);
+    border-radius: 4px;
+    margin-bottom: 3px;
+    overflow: hidden;
+    height: 44px;
+  }
+  .lb-pos {
+    font-family: 'Orbitron', monospace;
+    font-size: 14px; font-weight: 900;
+    width: 44px; min-width: 44px;
+    text-align: center;
+    color: #fff;
+  }
+  .lb-name  { flex: 1; font-size: 15px; font-weight: 700; padding: 0 8px; letter-spacing: 0.02em; }
+  .lb-pts   { font-family: 'Orbitron', monospace; font-size: 14px; font-weight: 700; width: 90px; text-align: right; color: var(--gold); padding-right: 12px; }
+  .lb-gap   { font-family: 'Orbitron', monospace; font-size: 11px; width: 80px; text-align: right; color: var(--muted); padding-right: 12px; }
+  .lb-row.top1 { border-left-color: var(--gold);   background: #161200; }
+  .lb-row.top2 { border-left-color: var(--silver); background: #0e0e18; }
+  .lb-row.top3 { border-left-color: var(--bronze); background: #140e00; }
+  .lb-row.top1 .lb-pos { color: var(--gold); }
+  .lb-row.top2 .lb-pos { color: var(--silver); }
+  .lb-row.top3 .lb-pos { color: var(--bronze); }
 
   /* END SCREEN */
   .end-box { text-align: center; max-width: 640px; width: 100%; }
@@ -310,9 +332,14 @@
 <!-- LEADERBOARD SCREEN -->
 <div id="screen-leaderboard" class="screen">
   <div class="lb-box">
-    <div class="lb-title">🏆 PODIUM</div>
+    <div class="lb-title">CONSTRUCTOR STANDINGS</div>
+    <div class="lb-header">
+      <span class="lbh-name">DRIVER</span>
+      <span class="lbh-pts">PTS</span>
+      <span class="lbh-gap">GAP</span>
+    </div>
     <div id="lb-list"></div>
-    <div style="margin-top:24px;">
+    <div style="margin-top:20px;">
       <button class="btn btn-red" id="lb-next-btn" onclick="continueFromLeaderboard()">Next Question</button>
     </div>
   </div>
@@ -644,6 +671,20 @@ function continueFromLeaderboard() {
   renderHostQuestion();
 }
 
+function buildLbRows(players, containerId) {
+  const list = document.getElementById(containerId);
+  list.innerHTML = '';
+  const leader = players[0] ? players[0].score : 0;
+  players.slice(0, 10).forEach((p, i) => {
+    const cls = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
+    const gap = i === 0 ? 'LEADER' : '-' + (leader - p.score) + ' PTS';
+    const row = document.createElement('div');
+    row.className = 'lb-row' + cls;
+    row.innerHTML = `<div class="lb-pos">P${i + 1}</div><div class="lb-name">${p.name}</div><div class="lb-pts">${p.score}</div><div class="lb-gap">${gap}</div>`;
+    list.appendChild(row);
+  });
+}
+
 function showLeaderboard(isFinal) {
   showScreen('leaderboard');
   document.getElementById('lb-next-btn').textContent = isFinal ? 'See Final Results' : 'Next Question';
@@ -651,15 +692,7 @@ function showLeaderboard(isFinal) {
     const players = [];
     snap.forEach(child => players.push(child.val()));
     players.sort((a, b) => b.score - a.score);
-    const list = document.getElementById('lb-list');
-    list.innerHTML = '';
-    const medals = ['🥇', '🥈', '🥉'];
-    players.slice(0, 10).forEach((p, i) => {
-      const row = document.createElement('div');
-      row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
-      row.innerHTML = `<div class="lb-rank">${medals[i] || 'P' + (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} PTS</div>`;
-      list.appendChild(row);
-    });
+    buildLbRows(players, 'lb-list');
   });
 }
 
@@ -669,15 +702,7 @@ function showEndScreen() {
     const players = [];
     snap.forEach(child => players.push(child.val()));
     players.sort((a, b) => b.score - a.score);
-    const list = document.getElementById('final-lb');
-    list.innerHTML = '';
-    const medals = ['🥇', '🥈', '🥉'];
-    players.slice(0, 10).forEach((p, i) => {
-      const row = document.createElement('div');
-      row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
-      row.innerHTML = `<div class="lb-rank">${medals[i] || 'P' + (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} PTS</div>`;
-      list.appendChild(row);
-    });
+    buildLbRows(players, 'final-lb');
   });
 }
 

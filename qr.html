@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Join the Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  :root {
+    --red: #e10600;
+    --gold: #ffd700;
+    --green: #00a550;
+    --bg: #080810;
+    --card: #0f0f1e;
+    --border: #1e1e3a;
+    --muted: #555577;
+    --text: #f0f0ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(225,6,0,0.1) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,165,80,0.07) 0%, transparent 50%);
+  }
+
+  body::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background-image: repeating-linear-gradient(90deg, #fff 0px, #fff 12px, #000 12px, #000 24px);
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    padding: 48px 44px 40px;
+    max-width: 480px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+  }
+
+  .icons { font-size: 32px; letter-spacing: 6px; margin-bottom: 20px; }
+
+  h1 {
+    font-family: 'Orbitron', monospace;
+    font-size: 26px;
+    font-weight: 900;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .tagline {
+    color: var(--red);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    margin-bottom: 32px;
+  }
+
+  #qr-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 28px;
+  }
+
+  #qr-container canvas,
+  #qr-container img {
+    border-radius: 12px;
+    border: 6px solid #fff;
+    display: block;
+  }
+
+  .url-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 8px;
+  }
+
+  .url-box {
+    background: #080810;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: var(--gold);
+    word-break: break-all;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 0.02em;
+  }
+
+  .player-section { margin-top: 28px; }
+
+  .player-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.12em;
+    margin-bottom: 10px;
+  }
+
+  .player-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+  .player-chip {
+    background: #14142a;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .dot-wrap { display: flex; align-items: center; gap: 6px; justify-content: center; margin-top: 12px; }
+  .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--red); animation: pulse 1.5s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.3s; }
+  .dot:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icons">⚽ 🏎️ 🎮</div>
+  <h1>Join the Quiz!</h1>
+  <p class="subtitle">Ridwan's 30th Birthday</p>
+  <p class="tagline">🏁 Scan to play 🏁</p>
+
+  <div id="qr-container"></div>
+
+  <div class="url-label">GAME URL</div>
+  <div class="url-box" id="url-display"></div>
+
+  <div class="player-section">
+    <div class="player-label">DRIVERS ON GRID</div>
+    <div class="player-grid" id="player-grid"></div>
+    <div class="dot-wrap"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+  // Derive the guest URL from the current page's location
+  const guestUrl = location.href.replace('qr.html', 'guest.html');
+
+  document.getElementById('url-display').textContent = guestUrl;
+
+  new QRCode(document.getElementById('qr-container'), {
+    text: guestUrl,
+    width: 220,
+    height: 220,
+    colorDark: '#000000',
+    colorLight: '#ffffff',
+    correctLevel: QRCode.CorrectLevel.M,
+  });
+
+  // Live player list
+  const firebaseConfig = {
+    apiKey: "AIzaSyAA_vS0Gban2LARCFzS48dTuY_GI6A3MbQ",
+    authDomain: "ridwan-bday-quiz.firebaseapp.com",
+    databaseURL: "https://ridwan-bday-quiz-default-rtdb.firebaseio.com",
+    projectId: "ridwan-bday-quiz",
+    storageBucket: "ridwan-bday-quiz.firebasestorage.app",
+    messagingSenderId: "901691269194",
+    appId: "1:901691269194:web:5c9acd21dae296f4b746b3"
+  };
+  firebase.initializeApp(firebaseConfig);
+  firebase.database().ref('players').on('value', snap => {
+    const players = snap.val() || {};
+    const grid = document.getElementById('player-grid');
+    grid.innerHTML = '';
+    Object.values(players).forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'player-chip';
+      chip.textContent = p.name;
+      grid.appendChild(chip);
+    });
+  });
+</script>
+</body>
+</html>
