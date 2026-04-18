@@ -302,6 +302,7 @@ const OPT_LABELS   = ["A", "B", "C", "D"];
 // ── STATE ──────────────────────────────────────────────────
 let currentQ = 0;
 let answersListener = null;
+let lbListener = null;
 
 // ── SCREENS ────────────────────────────────────────────────
 function showScreen(id) {
@@ -418,12 +419,6 @@ function nextQuestion() {
   showLeaderboard();
 }
 
-function continueFromLeaderboard() {
-  currentQ++;
-  showScreen('host');
-  renderHostQuestion();
-}
-
 // ── LEADERBOARD ────────────────────────────────────────────
 function buildLbRows(players, containerId) {
   const list = document.getElementById(containerId);
@@ -445,7 +440,8 @@ function buildLbRows(players, containerId) {
 function showLeaderboard() {
   showScreen('leaderboard');
   document.getElementById('lb-next-btn').textContent = 'Next Question';
-  playersRef.orderByChild('score').once('value', snap => {
+  if (lbListener) playersRef.off('value', lbListener);
+  lbListener = playersRef.on('value', snap => {
     const players = [];
     snap.forEach(child => players.push(child.val()));
     players.sort((a, b) => b.score - a.score);
@@ -454,13 +450,21 @@ function showLeaderboard() {
 }
 
 function showEndScreen() {
+  if (lbListener) { playersRef.off('value', lbListener); lbListener = null; }
   showScreen('end');
-  playersRef.orderByChild('score').once('value', snap => {
+  playersRef.once('value', snap => {
     const players = [];
     snap.forEach(child => players.push(child.val()));
     players.sort((a, b) => b.score - a.score);
     buildLbRows(players, 'final-lb');
   });
+}
+
+function continueFromLeaderboard() {
+  if (lbListener) { playersRef.off('value', lbListener); lbListener = null; }
+  currentQ++;
+  showScreen('host');
+  renderHostQuestion();
 }
 </script>
 </body>
