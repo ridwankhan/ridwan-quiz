@@ -291,20 +291,22 @@ function joinGame() {
   const name = document.getElementById('player-name').value.trim();
   if (!name) return alert("Please enter your name!");
   myName = name;
+
+  // Show waiting screen immediately — don't make them stare at the join screen
+  hasJoined = true;
+  showScreen('waiting');
+  document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
+
   const key = name.replace(/[.#$/[\]]/g, '_');
-  // Restore score first, then start listening — prevents race condition
+  // Restore existing score, check game phase, then start listening
   playersRef.child(key).once('value', snap => {
     const existing = snap.val();
     myScore = existing ? (existing.score || 0) : 0;
     scoredForQ = -1;
     playersRef.child(key).set({ name, score: myScore, joined: existing ? existing.joined : Date.now() });
-    // Check current game phase — if waiting/not started, player is ready for Q1
     gameRef.once('value', gameSnap => {
       const state = gameSnap.val();
       allowAnswering = !state || state.phase === 'waiting';
-      hasJoined = true;
-      showScreen('waiting');
-      document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
       listenForPlayers();
       listenForGameState();
     });
