@@ -279,8 +279,8 @@ let revealed = false;
 let scoredForQ      = -1;
 let gameListener    = null;
 let playersListener = null;
-let allowAnswering  = false;
-let hasJoined       = false; // true after first successful join; guards against reset handler firing on initial 'waiting' state
+let allowAnswering     = false;
+let hasBeenInGame      = false; // true only after player has seen an active game phase — used to distinguish reset vs fresh join
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -293,7 +293,6 @@ function joinGame() {
   myName = name;
 
   // Show waiting screen immediately — don't make them stare at the join screen
-  hasJoined = true;
   showScreen('waiting');
   document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
 
@@ -337,11 +336,11 @@ function listenForGameState() {
     currentQ = state.currentQ || 0;
 
     if (state.phase === 'waiting') {
-      // Only treat 'waiting' as a reset if the player has already been in the game
-      // (prevents initial join from being bounced back to join screen)
-      if (!hasJoined) return;
+      // Only redirect to join if the player has already been through an active game —
+      // otherwise this fires on fresh join and bounces them straight back to join screen
+      if (!hasBeenInGame) return;
       myName = ''; myScore = 0; myAnswer = null; revealed = false;
-      scoredForQ = -1; allowAnswering = false; hasJoined = false;
+      scoredForQ = -1; allowAnswering = false; hasBeenInGame = false;
       if (gameListener)    { gameRef.off('value', gameListener);      gameListener = null; }
       if (playersListener) { playersRef.off('value', playersListener); playersListener = null; }
       showScreen('join');
@@ -349,6 +348,8 @@ function listenForGameState() {
     }
 
     if (!ALL_QUESTIONS[currentQ]) return;
+
+    hasBeenInGame = true; // player has now seen an active game phase
 
     // Non-question phases unlock answering for the next question
     if (state.phase === 'revealed' || state.phase === 'leaderboard') {
