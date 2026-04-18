@@ -430,6 +430,8 @@ let currentQ = 0;
 let myScore = 0;
 let myAnswer = null;
 let revealed = false;
+let scoredForQ = -1;      // tracks which question we've already awarded points for
+let answersListener = null; // held so we can detach before re-attaching on reset
 
 // ============================================================
 // SCREENS
@@ -446,7 +448,14 @@ function joinGame() {
   const name = document.getElementById('player-name').value.trim();
   if (!name) return alert("Please enter your name!");
   myName = name;
-  playersRef.child(name.replace(/[.#$/[\]]/g, '_')).set({ name, score: 0, joined: Date.now() });
+  const key = name.replace(/[.#$/[\]]/g, '_');
+  // Restore existing score if the player refreshed mid-game
+  playersRef.child(key).once('value', snap => {
+    const existing = snap.val();
+    myScore = existing ? (existing.score || 0) : 0;
+    scoredForQ = -1;
+    playersRef.child(key).set({ name, score: myScore, joined: existing ? existing.joined : Date.now() });
+  });
   showScreen('waiting');
   document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
   listenForPlayers();
@@ -573,7 +582,8 @@ function showRevealedScreen(qIndex) {
   const isBonus = qIndex >= MAIN_QUESTIONS.length;
   const pts = isBonus ? POINTS_PER_Q * BONUS_MULTIPLIER : POINTS_PER_Q;
   const correct = myAnswer === q.ans;
-  if (correct) {
+  if (correct && scoredForQ !== qIndex) {
+    scoredForQ = qIndex;
     myScore += pts;
     const key = myName.replace(/[.#$/[\]]/g, '_');
     playersRef.child(key).update({ score: myScore });
@@ -599,7 +609,7 @@ function updateMyScore() {
 // ============================================================
 function initHost() {
   currentQ = 0;
-  gameRef.set({ phase: 'waiting', currentQ: 0 });
+  gameRef.update({ phase: 'waiting', currentQ: 0 }); // update not set — preserves hostActive
   listenForPlayers();
   renderHostQuestion();
   listenForAnswers();
@@ -635,7 +645,8 @@ function renderHostQuestion() {
 }
 
 function listenForAnswers() {
-  answersRef.on('value', snap => {
+  if (answersListener) answersRef.off('value', answersListener);
+  answersListener = answersRef.on('value', snap => {
     const all = snap.val() || {};
     const qAnswers = all[currentQ] || {};
     const count = Object.keys(qAnswers).length;
@@ -680,7 +691,11 @@ function buildLbRows(players, containerId) {
     const gap = i === 0 ? 'LEADER' : '-' + (leader - p.score) + ' PTS';
     const row = document.createElement('div');
     row.className = 'lb-row' + cls;
-    row.innerHTML = `<div class="lb-pos">P${i + 1}</div><div class="lb-name">${p.name}</div><div class="lb-pts">${p.score}</div><div class="lb-gap">${gap}</div>`;
+    const pos  = document.createElement('div'); pos.className  = 'lb-pos';  pos.textContent = 'P' + (i + 1);
+    const name = document.createElement('div'); name.className = 'lb-name'; name.textContent = p.name;
+    const pts  = document.createElement('div'); pts.className  = 'lb-pts';  pts.textContent = p.score;
+    const gapEl= document.createElement('div'); gapEl.className= 'lb-gap';  gapEl.textContent = gap;
+    row.append(pos, name, pts, gapEl);
     list.appendChild(row);
   });
 }
