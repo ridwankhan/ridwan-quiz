@@ -518,11 +518,14 @@ function showLeaderboard() {
 }
 
 function showEndScreen() {
-  if (lbListener) { playersRef.off('value', lbListener); lbListener = null; }
   showScreen('end');
-  playersRef.once('value', snap => {
+  if (lbListener) playersRef.off('value', lbListener);
+  lbListener = playersRef.on('value', snap => {
     const players = [];
-    snap.forEach(child => players.push(child.val()));
+    snap.forEach(child => {
+      const val = child.val();
+      if (val && val.name) players.push(val);
+    });
     buildLbRows(sortPlayers(players), 'final-lb');
   });
 }

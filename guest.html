@@ -440,11 +440,17 @@ function showRevealedScreen(qIndex) {
   document.getElementById('my-score').textContent = myScore;
 }
 
+let endListener = null;
+
 function showEndScreen() {
   showScreen('end');
-  playersRef.once('value', snap => {
+  if (endListener) playersRef.off('value', endListener);
+  endListener = playersRef.on('value', snap => {
     const players = [];
-    snap.forEach(child => players.push(child.val()));
+    snap.forEach(child => {
+      const val = child.val();
+      if (val && val.name) players.push(val);
+    });
     players.sort((a, b) => {
       const diff = Number(b.score) - Number(a.score);
       return diff !== 0 ? diff : a.name.localeCompare(b.name);
