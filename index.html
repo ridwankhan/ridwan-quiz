@@ -4,108 +4,233 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>How Well Do You Know Ridwan? 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
+  :root {
+    --red: #e10600;
+    --red-dark: #b30500;
+    --green: #00a550;
+    --green-dark: #007a3d;
+    --gold: #ffd700;
+    --silver: #9ca3af;
+    --bronze: #cd7f32;
+    --bg: #080810;
+    --card: #0f0f1e;
+    --card2: #14142a;
+    --border: #1e1e3a;
+    --muted: #555577;
+    --text: #f0f0ff;
+  }
+
   * { box-sizing: border-box; margin: 0; padding: 0; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f0f1a; color: #fff; min-height: 100vh; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(225,6,0,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,165,80,0.06) 0%, transparent 50%);
+  }
+
+  /* Checkered strip at top */
+  body::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background-image: repeating-linear-gradient(
+      90deg,
+      #fff 0px, #fff 12px,
+      #000 12px, #000 24px
+    );
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+  }
 
   /* SCREENS */
-  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen { display: none; min-height: 100vh; padding: 26px 20px 20px; }
   .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
 
+  /* HEADINGS */
+  .racing-heading {
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 0.04em;
+  }
+
   /* JOIN SCREEN */
-  .join-box { background: #1a1a2e; border-radius: 16px; padding: 40px; max-width: 400px; width: 100%; text-align: center; }
-  .join-box h1 { font-size: 28px; margin-bottom: 8px; }
-  .join-box p { color: #888; margin-bottom: 24px; font-size: 14px; }
-  .join-box input { width: 100%; padding: 14px 16px; border-radius: 10px; border: 2px solid #333; background: #0f0f1a; color: #fff; font-size: 16px; margin-bottom: 12px; outline: none; }
-  .join-box input:focus { border-color: #7c3aed; }
-  .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; }
-  .btn-purple { background: #7c3aed; color: #fff; }
-  .btn-purple:hover { background: #6d28d9; }
-  .btn-green { background: #16a34a; color: #fff; }
-  .btn-green:hover { background: #15803d; }
-  .btn-red { background: #dc2626; color: #fff; }
-  .btn-red:hover { background: #b91c1c; }
+  .join-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 40px 36px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .join-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+  }
+  .join-icons { font-size: 36px; margin-bottom: 16px; letter-spacing: 4px; }
+  .join-box h1 { font-family: 'Orbitron', monospace; font-size: 22px; margin-bottom: 6px; letter-spacing: 0.03em; }
+  .join-box .subtitle { color: var(--muted); margin-bottom: 6px; font-size: 13px; }
+  .join-tagline { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 28px; }
+  .join-box input {
+    width: 100%; padding: 14px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    margin-bottom: 12px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .join-box input:focus { border-color: var(--red); }
+
+  /* BUTTONS */
+  .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; }
+  .btn-red { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red-dark); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-outline { background: transparent; color: var(--muted); border: 1px solid var(--border); }
+  .btn-outline:hover { border-color: var(--muted); color: var(--text); }
+  .btn-gold { background: var(--gold); color: #000; }
+  .btn-gold:hover { background: #e6c200; }
 
   /* WAITING SCREEN */
-  .waiting-box { text-align: center; max-width: 500px; width: 100%; }
-  .waiting-box h2 { font-size: 24px; margin-bottom: 8px; }
-  .waiting-box p { color: #888; margin-bottom: 32px; }
+  .waiting-box { text-align: center; max-width: 520px; width: 100%; }
+  .waiting-box h2 { font-family: 'Orbitron', monospace; font-size: 22px; margin-bottom: 8px; }
+  .waiting-box .sub { color: var(--muted); margin-bottom: 32px; font-size: 14px; }
   .player-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
-  .player-chip { background: #1a1a2e; border: 1px solid #333; border-radius: 999px; padding: 6px 14px; font-size: 13px; }
+  .player-chip {
+    background: var(--card2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 5px 14px;
+    font-size: 13px;
+    color: var(--text);
+  }
 
   /* HOST SCREEN */
-  .host-box { max-width: 800px; width: 100%; }
-  .host-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-  .q-counter { font-size: 13px; color: #888; }
-  .tier-badge { font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 999px; letter-spacing: 0.05em; }
-  .tier-easy { background: #1e3a5f; color: #60a5fa; }
-  .tier-medium { background: #3d2a00; color: #fbbf24; }
-  .tier-hard { background: #3d1515; color: #f87171; }
-  .tier-chaos { background: #3d1535; color: #f472b6; }
-  .tier-bonus { background: #1a3d2e; color: #34d399; }
-  .q-text { font-size: 26px; font-weight: 700; margin-bottom: 32px; line-height: 1.3; }
-  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-  .option-btn { padding: 18px; border-radius: 12px; border: 2px solid #333; background: #1a1a2e; color: #fff; font-size: 16px; cursor: pointer; text-align: left; transition: all 0.2s; }
-  .option-btn:hover { border-color: #7c3aed; }
-  .option-btn.correct { background: #14532d; border-color: #16a34a; }
-  .option-btn.wrong { background: #450a0a; border-color: #dc2626; }
-  .option-btn.reveal { background: #14532d; border-color: #16a34a; }
-  .option-label { font-size: 11px; font-weight: 700; color: #888; margin-bottom: 4px; }
+  .host-box { max-width: 820px; width: 100%; }
+  .host-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+  .q-counter { font-size: 13px; color: var(--muted); font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 0.08em; }
+  .tier-badge { font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 999px; letter-spacing: 0.08em; font-family: 'Orbitron', monospace; }
+  .tier-easy   { background: #0d2545; color: #60a5fa; border: 1px solid #1e3a6e; }
+  .tier-medium { background: #2d1e00; color: #fbbf24; border: 1px solid #5a3c00; }
+  .tier-hard   { background: #2d0808; color: #f87171; border: 1px solid #5a1010; }
+  .tier-chaos  { background: #2d0a20; color: #f472b6; border: 1px solid #5a1040; }
+  .tier-bonus  { background: #0d2d1a; color: #34d399; border: 1px solid #1a5a34; }
+  .q-text { font-size: 28px; font-weight: 700; margin-bottom: 32px; line-height: 1.3; }
+  .options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
+  .option-btn {
+    padding: 18px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .option-btn:hover { border-color: var(--red); }
+  .option-btn.correct { background: #0a2e18; border-color: var(--green); }
+  .option-btn.wrong   { background: #2e0a0a; border-color: #dc2626; }
+  .option-label { font-size: 10px; font-weight: 700; color: var(--muted); margin-bottom: 4px; font-family: 'Orbitron', monospace; letter-spacing: 0.1em; }
   .host-controls { display: flex; gap: 12px; }
   .host-controls .btn { flex: 1; }
-  .bonus-notice { background: #1a3d2e; border: 1px solid #16a34a; border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #34d399; margin-bottom: 16px; text-align: center; }
+  .bonus-notice {
+    background: #0a2d1a;
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 16px;
+    font-size: 13px;
+    color: #34d399;
+    margin-bottom: 16px;
+    text-align: center;
+    font-family: 'Orbitron', monospace;
+    letter-spacing: 0.06em;
+  }
 
-  /* ANSWER SCREEN (players) */
+  /* ANSWER SCREEN */
   .answer-box { max-width: 500px; width: 100%; }
-  .answer-box h2 { font-size: 20px; margin-bottom: 8px; color: #888; }
-  .answer-q { font-size: 18px; font-weight: 600; margin-bottom: 24px; line-height: 1.4; }
+  .answer-box h2 { font-size: 13px; margin-bottom: 8px; color: var(--muted); font-family: 'Orbitron', monospace; letter-spacing: 0.1em; }
+  .answer-q { font-size: 19px; font-weight: 700; margin-bottom: 24px; line-height: 1.45; }
   .answer-options { display: flex; flex-direction: column; gap: 10px; }
-  .answer-btn { padding: 16px; border-radius: 12px; border: 2px solid #333; background: #1a1a2e; color: #fff; font-size: 15px; cursor: pointer; text-align: left; transition: all 0.2s; }
-  .answer-btn:hover { border-color: #7c3aed; background: #2d1a5e; }
-  .answer-btn.selected { border-color: #7c3aed; background: #2d1a5e; }
-  .answer-btn.correct { background: #14532d; border-color: #16a34a; }
-  .answer-btn.wrong { background: #450a0a; border-color: #dc2626; }
-  .answer-btn.reveal { background: #14532d; border-color: #16a34a; }
-  .answer-btn:disabled { cursor: default; }
+  .answer-btn {
+    padding: 16px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--card);
+    color: var(--text);
+    font-size: 15px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    font-family: 'Inter', sans-serif;
+  }
+  .answer-btn:hover   { border-color: var(--red); background: #1a0a0a; }
+  .answer-btn.selected{ border-color: var(--red); background: #1a0a0a; }
+  .answer-btn.correct { background: #0a2e18; border-color: var(--green); }
+  .answer-btn.wrong   { background: #2e0a0a; border-color: #dc2626; }
+  .answer-btn:disabled{ cursor: default; }
+
+  /* ANSWERED SCREEN */
   .answered-msg { text-align: center; padding: 40px 20px; }
-  .answered-msg h2 { font-size: 24px; margin-bottom: 8px; }
-  .answered-msg p { color: #888; }
-  .score-display { font-size: 48px; font-weight: 700; color: #7c3aed; margin: 16px 0; }
+  .answered-msg h2 { font-size: 22px; margin-bottom: 8px; }
+  .answered-msg p { color: var(--muted); }
+  .score-display { font-family: 'Orbitron', monospace; font-size: 52px; font-weight: 900; color: var(--gold); margin: 16px 0; text-shadow: 0 0 30px rgba(255,215,0,0.3); }
+  .score-label { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; font-family: 'Orbitron', monospace; }
+
+  /* RESULT BADGE */
+  .result-badge { display: inline-block; padding: 8px 22px; border-radius: 999px; font-weight: 700; font-size: 15px; margin-bottom: 16px; font-family: 'Orbitron', monospace; letter-spacing: 0.05em; }
+  .result-correct { background: #0a2e18; color: #4ade80; border: 1px solid var(--green); }
+  .result-wrong   { background: #2e0a0a; color: #f87171; border: 1px solid #dc2626; }
 
   /* LEADERBOARD */
-  .lb-box { max-width: 600px; width: 100%; }
-  .lb-box h2 { font-size: 28px; font-weight: 700; margin-bottom: 24px; text-align: center; }
-  .lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: #1a1a2e; border-radius: 12px; margin-bottom: 8px; }
-  .lb-rank { font-size: 20px; font-weight: 700; min-width: 32px; }
-  .lb-name { flex: 1; font-size: 16px; }
-  .lb-score { font-size: 18px; font-weight: 700; color: #7c3aed; }
-  .lb-row.top1 { background: #2d2200; border: 1px solid #fbbf24; }
-  .lb-row.top2 { background: #1a1f2e; border: 1px solid #9ca3af; }
-  .lb-row.top3 { background: #2d1a0a; border: 1px solid #d97706; }
+  .lb-box { max-width: 620px; width: 100%; }
+  .lb-title { font-family: 'Orbitron', monospace; font-size: 24px; font-weight: 900; margin-bottom: 24px; text-align: center; letter-spacing: 0.05em; }
+  .lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+  .lb-rank { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; min-width: 32px; }
+  .lb-name  { flex: 1; font-size: 16px; font-weight: 600; }
+  .lb-score { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: var(--gold); }
+  .lb-row.top1 { background: #1a1400; border-color: var(--gold); }
+  .lb-row.top2 { background: #111520; border-color: var(--silver); }
+  .lb-row.top3 { background: #1a0f00; border-color: var(--bronze); }
 
   /* END SCREEN */
-  .end-box { text-align: center; max-width: 600px; width: 100%; }
-  .end-box h1 { font-size: 36px; font-weight: 700; margin-bottom: 8px; }
-  .end-box p { color: #888; margin-bottom: 32px; }
-  .cake-msg { font-size: 64px; margin: 24px 0; }
-
-  /* HOST PANEL */
-  .host-panel { position: fixed; top: 16px; right: 16px; background: #1a1a2e; border: 1px solid #333; border-radius: 10px; padding: 12px 16px; font-size: 12px; color: #888; z-index: 100; }
-  .host-panel a { color: #7c3aed; cursor: pointer; text-decoration: underline; }
+  .end-box { text-align: center; max-width: 640px; width: 100%; }
+  .end-box h1 { font-family: 'Orbitron', monospace; font-size: 30px; font-weight: 900; margin-bottom: 8px; letter-spacing: 0.04em; }
+  .end-box .end-sub { color: var(--muted); margin-bottom: 32px; font-size: 14px; }
+  .end-icons { font-size: 56px; margin: 20px 0; letter-spacing: 6px; }
 
   /* PROGRESS BAR */
-  .progress-wrap { width: 100%; background: #1a1a2e; border-radius: 999px; height: 6px; margin-bottom: 24px; overflow: hidden; }
-  .progress-fill { height: 100%; background: #7c3aed; border-radius: 999px; transition: width 0.4s; }
+  .progress-wrap { width: 100%; background: var(--card2); border-radius: 999px; height: 6px; margin-bottom: 24px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); border-radius: 999px; transition: width 0.5s ease; }
 
-  .waiting-indicator { display: flex; align-items: center; gap: 8px; color: #888; font-size: 14px; margin-top: 16px; }
-  .dot { width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; animation: pulse 1.5s infinite; }
+  /* WAITING DOTS */
+  .waiting-indicator { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; margin-top: 16px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: pulse 1.5s infinite; }
   .dot:nth-child(2) { animation-delay: 0.3s; }
   .dot:nth-child(3) { animation-delay: 0.6s; }
-  @keyframes pulse { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+  @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
 
-  .result-badge { display: inline-block; padding: 8px 20px; border-radius: 999px; font-weight: 700; font-size: 16px; margin-bottom: 16px; }
-  .result-correct { background: #14532d; color: #4ade80; }
-  .result-wrong { background: #450a0a; color: #f87171; }
+  /* HOST ANSWER COUNT */
+  .answers-count { font-size: 13px; color: var(--muted); margin-bottom: 16px; font-family: 'Orbitron', monospace; font-size: 11px; letter-spacing: 0.06em; }
+
+  /* DIVIDER */
+  .divider { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
 </style>
 </head>
 <body>
@@ -113,13 +238,14 @@
 <!-- JOIN SCREEN -->
 <div id="screen-join" class="screen active">
   <div class="join-box">
-    <div style="font-size:48px;margin-bottom:16px;">🎂</div>
-    <h1>How Well Do You Know Ridwan?</h1>
-    <p>30th Birthday Quiz</p>
+    <div class="join-icons">⚽ 🏎️ 🎮</div>
+    <h1 class="racing-heading">Know Your Ridwan?</h1>
+    <p class="subtitle">30th Birthday Quiz</p>
+    <p class="join-tagline">🏁 Lights out and away we go 🏁</p>
     <input type="text" id="player-name" placeholder="Enter your name" maxlength="20" />
-    <button class="btn btn-purple" onclick="joinGame()">Join Game</button>
-    <div style="margin-top:16px;border-top:1px solid #333;padding-top:16px;">
-      <button class="btn btn-red" onclick="goHost()" style="font-size:13px;padding:10px;">I'm the Host</button>
+    <button class="btn btn-red" onclick="joinGame()">Join Game</button>
+    <div class="divider">
+      <button class="btn btn-outline" onclick="goHost()" style="font-size:13px;padding:10px;">I'm the Host</button>
     </div>
     <div id="host-taken-msg" style="display:none;margin-top:10px;color:#f87171;font-size:13px;">A host is already in the session.</div>
   </div>
@@ -128,12 +254,12 @@
 <!-- WAITING SCREEN (players) -->
 <div id="screen-waiting" class="screen">
   <div class="waiting-box">
-    <div style="font-size:48px;margin-bottom:16px;">👋</div>
+    <div style="font-size:44px;margin-bottom:16px;">⚙️</div>
     <h2 id="waiting-name">Hey!</h2>
-    <p>Waiting for the host to start the game...</p>
+    <p class="sub">You're in the pit lane — waiting for the host to start...</p>
     <div class="waiting-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
     <div style="margin-top:32px;">
-      <p style="font-size:13px;color:#555;margin-bottom:12px;">Players joined:</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-family:'Orbitron',monospace;letter-spacing:0.08em;">DRIVERS ON GRID</p>
       <div class="player-grid" id="player-grid"></div>
     </div>
   </div>
@@ -155,7 +281,7 @@
     <h2 id="answered-result">Answer locked in!</h2>
     <p id="answered-sub">Waiting for host to reveal...</p>
     <div class="score-display" id="my-score">0</div>
-    <p style="color:#888;font-size:14px;">your score</p>
+    <p class="score-label">YOUR SCORE</p>
   </div>
 </div>
 
@@ -167,16 +293,16 @@
       <div class="q-counter" id="host-q-counter">Question 1 of 20</div>
       <div class="tier-badge tier-easy" id="host-tier-badge">EASY</div>
     </div>
-    <div id="bonus-notice" class="bonus-notice" style="display:none;">⚡ BONUS ROUND — Double Points!</div>
+    <div id="bonus-notice" class="bonus-notice" style="display:none;">🚀 TURBO BOOST — Double Points!</div>
     <div class="q-text" id="host-q-text"></div>
     <div class="options-grid" id="host-options"></div>
-    <div style="font-size:13px;color:#888;margin-bottom:16px;" id="host-answers-count">0 players answered</div>
+    <div class="answers-count" id="host-answers-count">0 PLAYERS ANSWERED</div>
     <div class="host-controls">
       <button class="btn btn-green" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
-      <button class="btn btn-purple" id="next-btn" onclick="nextQuestion()" style="display:none;">Next Question</button>
+      <button class="btn btn-gold" id="next-btn" onclick="nextQuestion()" style="display:none;">Next Question</button>
     </div>
-    <div style="margin-top:16px;border-top:1px solid #333;padding-top:16px;">
-      <button class="btn btn-red" onclick="resetGame()" style="font-size:13px;padding:10px;">Reset Game</button>
+    <div class="divider">
+      <button class="btn btn-outline" onclick="resetGame()" style="font-size:13px;padding:10px;">↺ Reset Game</button>
     </div>
   </div>
 </div>
@@ -184,10 +310,10 @@
 <!-- LEADERBOARD SCREEN -->
 <div id="screen-leaderboard" class="screen">
   <div class="lb-box">
-    <h2>🏆 Leaderboard</h2>
+    <div class="lb-title">🏆 PODIUM</div>
     <div id="lb-list"></div>
     <div style="margin-top:24px;">
-      <button class="btn btn-purple" id="lb-next-btn" onclick="continueFromLeaderboard()">Next Question</button>
+      <button class="btn btn-red" id="lb-next-btn" onclick="continueFromLeaderboard()">Next Question</button>
     </div>
   </div>
 </div>
@@ -195,11 +321,11 @@
 <!-- END SCREEN -->
 <div id="screen-end" class="screen">
   <div class="end-box">
-    <h1>Happy 30th Ridwan! 🎉</h1>
-    <p>The quiz is over. Here are your final standings.</p>
+    <h1>Happy 30th Ridwan!</h1>
+    <p class="end-sub">The chequered flag is out. Final standings below.</p>
     <div id="final-lb"></div>
-    <div class="cake-msg">🎂</div>
-    <p style="font-size:18px;font-weight:600;color:#fbbf24;">Time to cut the cake!</p>
+    <div class="end-icons">🏁 🎂 🏁</div>
+    <p style="font-size:17px;font-weight:700;color:var(--gold);font-family:'Orbitron',monospace;letter-spacing:0.04em;">Time to cut the cake!</p>
   </div>
 </div>
 
@@ -209,7 +335,7 @@
 
 <script>
 // ============================================================
-// PASTE YOUR FIREBASE CONFIG HERE
+// FIREBASE CONFIG
 // ============================================================
 const firebaseConfig = {
   apiKey: "AIzaSyAA_vS0Gban2LARCFzS48dTuY_GI6A3MbQ",
@@ -264,9 +390,9 @@ const ALL_QUESTIONS = [...MAIN_QUESTIONS, ...BONUS_QUESTIONS];
 const POINTS_PER_Q = 100;
 const BONUS_MULTIPLIER = 2;
 
-const TIER_LABELS = { easy: "EASY", medium: "MEDIUM", hard: "HARD", chaos: "CHAOS", bonus: "BONUS x2" };
+const TIER_LABELS  = { easy: "EASY", medium: "MEDIUM", hard: "HARD", chaos: "CHAOS", bonus: "TURBO x2" };
 const TIER_CLASSES = { easy: "tier-easy", medium: "tier-medium", hard: "tier-hard", chaos: "tier-chaos", bonus: "tier-bonus" };
-const OPT_LABELS = ["A", "B", "C", "D"];
+const OPT_LABELS   = ["A", "B", "C", "D"];
 
 // ============================================================
 // STATE
@@ -372,7 +498,7 @@ function listenForGameState() {
       updateMyScore();
       showScreen('answered');
       document.getElementById('answered-result').textContent = "Check the big screen!";
-      document.getElementById('answered-sub').textContent = "Leaderboard time 🏆";
+      document.getElementById('answered-sub').textContent = "Podium time 🏆";
       document.getElementById('result-badge').textContent = "⏳";
       document.getElementById('result-badge').className = 'result-badge';
     } else if (state.phase === 'end') {
@@ -383,7 +509,9 @@ function listenForGameState() {
 
 function showAnswerScreen(qIndex) {
   const q = ALL_QUESTIONS[qIndex];
-  document.getElementById('answer-q-num').textContent = qIndex < MAIN_QUESTIONS.length ? `Question ${qIndex + 1} of 20` : `Bonus Question ${qIndex - MAIN_QUESTIONS.length + 1}`;
+  document.getElementById('answer-q-num').textContent = qIndex < MAIN_QUESTIONS.length
+    ? `QUESTION ${qIndex + 1} OF 20`
+    : `TURBO ROUND ${qIndex - MAIN_QUESTIONS.length + 1}`;
   document.getElementById('answer-q-text').textContent = q.q;
   const opts = document.getElementById('answer-options');
   opts.innerHTML = '';
@@ -424,8 +552,12 @@ function showRevealedScreen(qIndex) {
     playersRef.child(key).update({ score: myScore });
   }
   showScreen('answered');
-  document.getElementById('answered-result').textContent = correct ? (isBonus ? `+${pts} points! DOUBLE!` : `+${pts} points!`) : "Not quite!";
-  document.getElementById('answered-sub').textContent = correct ? "Correct! 🎉" : `The answer was: ${q.opts[q.ans]}`;
+  document.getElementById('answered-result').textContent = correct
+    ? (isBonus ? `+${pts} pts — TURBO BOOST!` : `+${pts} points!`)
+    : "Not quite!";
+  document.getElementById('answered-sub').textContent = correct
+    ? "Correct! 🎉"
+    : `The answer was: ${q.opts[q.ans]}`;
   document.getElementById('result-badge').textContent = correct ? "✓ Correct!" : "✗ Wrong";
   document.getElementById('result-badge').className = 'result-badge ' + (correct ? 'result-correct' : 'result-wrong');
   document.getElementById('my-score').textContent = myScore;
@@ -449,10 +581,9 @@ function initHost() {
 function renderHostQuestion() {
   const q = ALL_QUESTIONS[currentQ];
   const isBonus = currentQ >= MAIN_QUESTIONS.length;
-  const total = currentQ < MAIN_QUESTIONS.length ? 20 : 3;
   const num = currentQ < MAIN_QUESTIONS.length ? currentQ + 1 : currentQ - MAIN_QUESTIONS.length + 1;
 
-  document.getElementById('host-q-counter').textContent = isBonus ? `Bonus ${num} of 3` : `Question ${num} of 20`;
+  document.getElementById('host-q-counter').textContent = isBonus ? `TURBO ${num} OF 3` : `QUESTION ${num} OF 20`;
   document.getElementById('host-tier-badge').textContent = TIER_LABELS[q.tier];
   document.getElementById('host-tier-badge').className = 'tier-badge ' + TIER_CLASSES[q.tier];
   document.getElementById('host-q-text').textContent = q.q;
@@ -471,7 +602,7 @@ function renderHostQuestion() {
 
   document.getElementById('reveal-btn').style.display = 'block';
   document.getElementById('next-btn').style.display = 'none';
-  document.getElementById('host-answers-count').textContent = '0 players answered';
+  document.getElementById('host-answers-count').textContent = '0 PLAYERS ANSWERED';
 
   gameRef.update({ phase: 'question', currentQ });
 }
@@ -482,14 +613,13 @@ function listenForAnswers() {
     const qAnswers = all[currentQ] || {};
     const count = Object.keys(qAnswers).length;
     const el = document.getElementById('host-answers-count');
-    if (el) el.textContent = count + ' player' + (count !== 1 ? 's' : '') + ' answered';
+    if (el) el.textContent = count + ' PLAYER' + (count !== 1 ? 'S' : '') + ' ANSWERED';
   });
 }
 
 function revealAnswer() {
   const q = ALL_QUESTIONS[currentQ];
-  const opts = document.querySelectorAll('.option-btn');
-  opts.forEach((btn, i) => {
+  document.querySelectorAll('.option-btn').forEach((btn, i) => {
     if (i === q.ans) btn.classList.add('correct');
     else btn.classList.add('wrong');
   });
@@ -527,7 +657,7 @@ function showLeaderboard(isFinal) {
     players.slice(0, 10).forEach((p, i) => {
       const row = document.createElement('div');
       row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
-      row.innerHTML = `<div class="lb-rank">${medals[i] || (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} pts</div>`;
+      row.innerHTML = `<div class="lb-rank">${medals[i] || 'P' + (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} PTS</div>`;
       list.appendChild(row);
     });
   });
@@ -545,7 +675,7 @@ function showEndScreen() {
     players.slice(0, 10).forEach((p, i) => {
       const row = document.createElement('div');
       row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
-      row.innerHTML = `<div class="lb-rank">${medals[i] || (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} pts</div>`;
+      row.innerHTML = `<div class="lb-rank">${medals[i] || 'P' + (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} PTS</div>`;
       list.appendChild(row);
     });
   });
@@ -556,4 +686,3 @@ document.getElementById('player-name').addEventListener('keydown', e => { if (e.
 </script>
 </body>
 </html>
-HTMLEOF
