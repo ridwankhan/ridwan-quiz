@@ -146,6 +146,19 @@
   .progress-fill { height: 100%; background: linear-gradient(90deg, var(--red), var(--gold)); border-radius: 999px; transition: width 0.5s ease; }
   .divider { margin-top: 16px; border-top: 1px solid var(--border); padding-top: 16px; }
 
+  /* ── MINI QR (persistent join reminder) ── */
+  .mini-qr-wrap {
+    position: fixed; bottom: 16px; right: 16px;
+    background: #fff; border-radius: 10px; padding: 8px;
+    z-index: 100; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    display: none;
+  }
+  .mini-qr-wrap.visible { display: block; }
+  .mini-qr-label {
+    font-family: 'Orbitron', monospace; font-size: 8px;
+    color: #000; text-align: center; margin-top: 4px; letter-spacing: 0.1em;
+  }
+
   /* ── LEADERBOARD ── */
   .lb-box { max-width: 660px; width: 100%; }
   .lb-title { font-family: 'Orbitron', monospace; font-size: 13px; font-weight: 900; margin-bottom: 4px; text-align: center; letter-spacing: 0.2em; color: var(--muted); }
@@ -190,6 +203,8 @@
       <div class="player-count" id="lobby-player-count">0 DRIVERS ON GRID</div>
       <div class="player-grid" id="lobby-player-grid"></div>
       <button class="btn btn-red" onclick="startGame()">Start Game</button>
+      <button id="resume-btn" class="btn btn-outline" onclick="resumeGame()" style="display:none;margin-top:10px;"></button>
+      <button class="btn btn-outline" onclick="resetGame()" style="margin-top:10px;font-size:13px;padding:10px;">↺ Reset</button>
     </div>
   </div>
 </div>
@@ -243,6 +258,12 @@
     <p style="font-size:17px;font-weight:700;color:var(--gold);font-family:'Orbitron',monospace;letter-spacing:0.04em;margin-bottom:24px;">Time to cut the cake!</p>
     <button class="btn btn-outline" style="max-width:200px;" onclick="resetGame()">↺ New Game</button>
   </div>
+</div>
+
+<!-- Mini QR: always visible on host screens so latecomers can scan -->
+<div class="mini-qr-wrap" id="mini-qr-wrap">
+  <div id="mini-qr-code"></div>
+  <div class="mini-qr-label">SCAN TO JOIN</div>
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -308,6 +329,9 @@ let lbListener = null;
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + id).classList.add('active');
+  // Show mini QR on all host screens except lobby (which has the full QR)
+  const miniWrap = document.getElementById('mini-qr-wrap');
+  if (miniWrap) miniWrap.classList.toggle('visible', id !== 'lobby');
 }
 
 // ── QR CODE + LOBBY ────────────────────────────────────────
@@ -315,6 +339,11 @@ const guestUrl = new URL('guest.html', location.href).href;
 document.getElementById('lobby-url').textContent = guestUrl;
 new QRCode(document.getElementById('qr-container'), {
   text: guestUrl, width: 200, height: 200,
+  colorDark: '#000000', colorLight: '#ffffff',
+  correctLevel: QRCode.CorrectLevel.M,
+});
+new QRCode(document.getElementById('mini-qr-code'), {
+  text: guestUrl, width: 80, height: 80,
   colorDark: '#000000', colorLight: '#ffffff',
   correctLevel: QRCode.CorrectLevel.M,
 });
@@ -336,11 +365,29 @@ playersRef.on('value', snap => {
   if (count) count.textContent = vals.length + ' DRIVER' + (vals.length !== 1 ? 'S' : '') + ' ON GRID';
 });
 
+// On load: check if a game is already in progress so host can resume
+gameRef.once('value', snap => {
+  const state = snap.val();
+  if (state && state.phase && state.phase !== 'waiting' && state.currentQ != null) {
+    const resumeBtn = document.getElementById('resume-btn');
+    const qNum = Number(state.currentQ) + 1;
+    resumeBtn.textContent = `↩ Resume from Q${qNum}`;
+    resumeBtn.style.display = 'block';
+    currentQ = Number(state.currentQ);
+  }
+});
+
 // ── START GAME ─────────────────────────────────────────────
 function startGame() {
   currentQ = 0;
   showScreen('host');
-  renderHostQuestion(); // renderHostQuestion writes phase:'question' to Firebase
+  renderHostQuestion();
+  listenForAnswers();
+}
+
+function resumeGame() {
+  showScreen('host');
+  renderHostQuestion();
   listenForAnswers();
 }
 

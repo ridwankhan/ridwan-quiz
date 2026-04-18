@@ -276,9 +276,10 @@ let currentQ = 0;
 let myScore  = 0;
 let myAnswer = null;
 let revealed = false;
-let scoredForQ = -1;
+let scoredForQ      = -1;
 let gameListener    = null;
 let playersListener = null;
+let allowAnswering  = false; // true once guest is synced to the game flow
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -296,10 +297,15 @@ function joinGame() {
     myScore = existing ? (existing.score || 0) : 0;
     scoredForQ = -1;
     playersRef.child(key).set({ name, score: myScore, joined: existing ? existing.joined : Date.now() });
-    showScreen('waiting');
-    document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
-    listenForPlayers();
-    listenForGameState();
+    // Check current game phase — if waiting/not started, player is ready for Q1
+    gameRef.once('value', gameSnap => {
+      const state = gameSnap.val();
+      allowAnswering = !state || state.phase === 'waiting';
+      showScreen('waiting');
+      document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
+      listenForPlayers();
+      listenForGameState();
+    });
   });
 }
 
@@ -327,8 +333,9 @@ function listenForGameState() {
     currentQ = state.currentQ || 0;
 
     if (state.phase === 'waiting') {
-      // Host reset — send players back to join screen
-      myName = ''; myScore = 0; myAnswer = null; revealed = false; scoredForQ = -1;
+      // Host reset — clear state and send back to join screen
+      myName = ''; myScore = 0; myAnswer = null; revealed = false;
+      scoredForQ = -1; allowAnswering = false;
       if (gameListener)    { gameRef.off('value', gameListener);      gameListener = null; }
       if (playersListener) { playersRef.off('value', playersListener); playersListener = null; }
       showScreen('join');
@@ -337,9 +344,22 @@ function listenForGameState() {
 
     if (!ALL_QUESTIONS[currentQ]) return;
 
+    // Non-question phases unlock answering for the next question
+    if (state.phase === 'revealed' || state.phase === 'leaderboard') {
+      allowAnswering = true;
+    }
+
     if (state.phase === 'question') {
+      if (!allowAnswering) {
+        // Joined mid-game — stay on waiting screen until next question cycle
+        document.getElementById('waiting-name').textContent = "Almost there!";
+        document.querySelector('.waiting-box .sub').textContent = "Game is in progress — you'll join next round.";
+        showScreen('waiting');
+        return;
+      }
       myAnswer = null;
       revealed = false;
+      allowAnswering = false; // reset; next non-question phase re-enables it
       showAnswerScreen(currentQ);
     } else if (state.phase === 'revealed') {
       revealed = true;
