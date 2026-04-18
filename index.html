@@ -121,6 +121,7 @@
     <div style="margin-top:16px;border-top:1px solid #333;padding-top:16px;">
       <button class="btn btn-red" onclick="goHost()" style="font-size:13px;padding:10px;">I'm the Host</button>
     </div>
+    <div id="host-taken-msg" style="display:none;margin-top:10px;color:#f87171;font-size:13px;">A host is already in the session.</div>
   </div>
 </div>
 
@@ -173,6 +174,9 @@
     <div class="host-controls">
       <button class="btn btn-green" id="reveal-btn" onclick="revealAnswer()">Reveal Answer</button>
       <button class="btn btn-purple" id="next-btn" onclick="nextQuestion()" style="display:none;">Next Question</button>
+    </div>
+    <div style="margin-top:16px;border-top:1px solid #333;padding-top:16px;">
+      <button class="btn btn-red" onclick="resetGame()" style="font-size:13px;padding:10px;">Reset Game</button>
     </div>
   </div>
 </div>
@@ -297,9 +301,33 @@ function joinGame() {
 }
 
 function goHost() {
-  isHost = true;
-  showScreen('host');
-  initHost();
+  db.ref('game/hostActive').once('value', snap => {
+    if (snap.val()) {
+      document.getElementById('host-taken-msg').style.display = 'block';
+      return;
+    }
+    isHost = true;
+    db.ref('game/hostActive').set(true);
+    db.ref('game/hostActive').onDisconnect().remove();
+    showScreen('host');
+    initHost();
+  });
+}
+
+function resetGame() {
+  if (!confirm('Reset the game? This will clear all players and scores.')) return;
+  Promise.all([
+    playersRef.remove(),
+    answersRef.remove(),
+    gameRef.set({ phase: 'waiting', currentQ: 0, hostActive: true }),
+  ]).then(() => {
+    currentQ = 0;
+    myScore = 0;
+    myAnswer = null;
+    revealed = false;
+    renderHostQuestion();
+    listenForAnswers();
+  });
 }
 
 // ============================================================
