@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>How Well Do You Know Ridwan? 🎂</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --red: #e10600;
+    --red-dark: #b30500;
+    --green: #00a550;
+    --green-dark: #007a3d;
+    --gold: #ffd700;
+    --silver: #9ca3af;
+    --bronze: #cd7f32;
+    --bg: #080810;
+    --card: #0f0f1e;
+    --card2: #14142a;
+    --border: #1e1e3a;
+    --muted: #555577;
+    --text: #f0f0ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    background-image:
+      radial-gradient(ellipse at 20% 0%, rgba(225,6,0,0.08) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 100%, rgba(0,165,80,0.06) 0%, transparent 50%);
+  }
+
+  body::before {
+    content: '';
+    display: block;
+    height: 6px;
+    background-image: repeating-linear-gradient(90deg, #fff 0px, #fff 12px, #000 12px, #000 24px);
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    z-index: 999;
+  }
+
+  .screen { display: none; min-height: 100vh; padding: 26px 20px 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; justify-content: center; }
+
+  /* JOIN */
+  .join-box {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 44px 40px 36px;
+    max-width: 420px;
+    width: 100%;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .join-box::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--red), var(--gold), var(--green));
+  }
+  .join-icons { font-size: 36px; margin-bottom: 16px; letter-spacing: 4px; }
+  .join-box h1 { font-family: 'Orbitron', monospace; font-size: 22px; margin-bottom: 6px; letter-spacing: 0.03em; }
+  .join-box .subtitle { color: var(--muted); margin-bottom: 6px; font-size: 13px; }
+  .join-tagline { color: var(--red); font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 28px; }
+  .join-box input {
+    width: 100%; padding: 14px 16px;
+    border-radius: 10px;
+    border: 2px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    font-size: 16px;
+    margin-bottom: 12px;
+    outline: none;
+    font-family: 'Inter', sans-serif;
+  }
+  .join-box input:focus { border-color: var(--red); }
+
+  .btn { width: 100%; padding: 14px; border-radius: 10px; border: none; font-size: 16px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: 'Inter', sans-serif; letter-spacing: 0.02em; }
+  .btn-red   { background: var(--red); color: #fff; }
+  .btn-red:hover { background: var(--red-dark); }
+  .btn-green { background: var(--green); color: #fff; }
+  .btn-green:hover { background: var(--green-dark); }
+  .btn-gold  { background: var(--gold); color: #000; }
+  .btn-gold:hover { background: #e6c200; }
+
+  /* WAITING */
+  .waiting-box { text-align: center; max-width: 520px; width: 100%; }
+  .waiting-box h2 { font-family: 'Orbitron', monospace; font-size: 22px; margin-bottom: 8px; }
+  .waiting-box .sub { color: var(--muted); margin-bottom: 32px; font-size: 14px; }
+  .player-grid { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 16px; }
+  .player-chip { background: var(--card2); border: 1px solid var(--border); border-radius: 999px; padding: 5px 14px; font-size: 13px; }
+
+  /* ANSWER */
+  .answer-box { max-width: 500px; width: 100%; }
+  .answer-box h2 { font-size: 13px; margin-bottom: 8px; color: var(--muted); font-family: 'Orbitron', monospace; letter-spacing: 0.1em; }
+  .answer-q { font-size: 19px; font-weight: 700; margin-bottom: 24px; line-height: 1.45; }
+  .answer-options { display: flex; flex-direction: column; gap: 10px; }
+  .answer-btn {
+    padding: 16px; border-radius: 12px; border: 2px solid var(--border);
+    background: var(--card); color: var(--text); font-size: 15px;
+    cursor: pointer; text-align: left; transition: all 0.2s; font-family: 'Inter', sans-serif;
+  }
+  .answer-btn:hover    { border-color: var(--red); background: #1a0a0a; }
+  .answer-btn.selected { border-color: var(--red); background: #1a0a0a; }
+  .answer-btn.correct  { background: #0a2e18; border-color: var(--green); }
+  .answer-btn.wrong    { background: #2e0a0a; border-color: #dc2626; }
+  .answer-btn:disabled { cursor: default; }
+
+  /* ANSWERED */
+  .answered-msg { text-align: center; padding: 40px 20px; }
+  .answered-msg h2 { font-size: 22px; margin-bottom: 8px; }
+  .answered-msg p { color: var(--muted); }
+  .score-display { font-family: 'Orbitron', monospace; font-size: 52px; font-weight: 900; color: var(--gold); margin: 16px 0; text-shadow: 0 0 30px rgba(255,215,0,0.3); }
+  .score-label { font-size: 12px; color: var(--muted); letter-spacing: 0.1em; font-family: 'Orbitron', monospace; }
+
+  .result-badge { display: inline-block; padding: 8px 22px; border-radius: 999px; font-weight: 700; font-size: 15px; margin-bottom: 16px; font-family: 'Orbitron', monospace; letter-spacing: 0.05em; }
+  .result-correct { background: #0a2e18; color: #4ade80; border: 1px solid var(--green); }
+  .result-wrong   { background: #2e0a0a; color: #f87171; border: 1px solid #dc2626; }
+
+  /* END */
+  .end-box { text-align: center; max-width: 640px; width: 100%; }
+  .end-box h1 { font-family: 'Orbitron', monospace; font-size: 30px; font-weight: 900; margin-bottom: 8px; letter-spacing: 0.04em; }
+  .end-box .end-sub { color: var(--muted); margin-bottom: 32px; font-size: 14px; }
+  .end-icons { font-size: 56px; margin: 20px 0; letter-spacing: 6px; }
+
+  .lb-row { display: flex; align-items: center; gap: 16px; padding: 14px 20px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 8px; }
+  .lb-rank  { font-family: 'Orbitron', monospace; font-size: 18px; font-weight: 900; min-width: 32px; }
+  .lb-name  { flex: 1; font-size: 16px; font-weight: 600; }
+  .lb-score { font-family: 'Orbitron', monospace; font-size: 16px; font-weight: 700; color: var(--gold); }
+  .lb-row.top1 { background: #1a1400; border-color: var(--gold); }
+  .lb-row.top2 { background: #111520; border-color: var(--silver); }
+  .lb-row.top3 { background: #1a0f00; border-color: var(--bronze); }
+
+  .waiting-indicator { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 14px; margin-top: 16px; justify-content: center; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); animation: pulse 1.5s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.3s; }
+  .dot:nth-child(3) { animation-delay: 0.6s; }
+  @keyframes pulse { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+</style>
+</head>
+<body>
+
+<!-- JOIN SCREEN -->
+<div id="screen-join" class="screen active">
+  <div class="join-box">
+    <div class="join-icons">⚽ 🏎️ 🎮</div>
+    <h1>Know Your Ridwan?</h1>
+    <p class="subtitle">30th Birthday Quiz</p>
+    <p class="join-tagline">🏁 Lights out and away we go 🏁</p>
+    <input type="text" id="player-name" placeholder="Enter your name" maxlength="20" />
+    <button class="btn btn-red" onclick="joinGame()">Join Game</button>
+  </div>
+</div>
+
+<!-- WAITING SCREEN -->
+<div id="screen-waiting" class="screen">
+  <div class="waiting-box">
+    <div style="font-size:44px;margin-bottom:16px;">⚙️</div>
+    <h2 id="waiting-name">Hey!</h2>
+    <p class="sub">You're in the pit lane — waiting for the host to start...</p>
+    <div class="waiting-indicator"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+    <div style="margin-top:32px;">
+      <p style="font-size:12px;color:var(--muted);margin-bottom:12px;font-family:'Orbitron',monospace;letter-spacing:0.08em;">DRIVERS ON GRID</p>
+      <div class="player-grid" id="player-grid"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ANSWER SCREEN -->
+<div id="screen-answer" class="screen">
+  <div class="answer-box">
+    <h2 id="answer-q-num">Question 1</h2>
+    <div class="answer-q" id="answer-q-text"></div>
+    <div class="answer-options" id="answer-options"></div>
+  </div>
+</div>
+
+<!-- ANSWERED SCREEN -->
+<div id="screen-answered" class="screen">
+  <div class="answered-msg">
+    <div class="result-badge" id="result-badge">Locked in!</div>
+    <h2 id="answered-result">Answer locked in!</h2>
+    <p id="answered-sub">Waiting for host to reveal...</p>
+    <div class="score-display" id="my-score">0</div>
+    <p class="score-label">YOUR SCORE</p>
+  </div>
+</div>
+
+<!-- END SCREEN -->
+<div id="screen-end" class="screen">
+  <div class="end-box">
+    <h1>Happy 30th Ridwan!</h1>
+    <p class="end-sub">The chequered flag is out. Final standings below.</p>
+    <div id="final-lb"></div>
+    <div class="end-icons">🏁 🎂 🏁</div>
+    <p style="font-size:17px;font-weight:700;color:var(--gold);font-family:'Orbitron',monospace;letter-spacing:0.04em;">Time to cut the cake!</p>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyAA_vS0Gban2LARCFzS48dTuY_GI6A3MbQ",
+  authDomain: "ridwan-bday-quiz.firebaseapp.com",
+  databaseURL: "https://ridwan-bday-quiz-default-rtdb.firebaseio.com",
+  projectId: "ridwan-bday-quiz",
+  storageBucket: "ridwan-bday-quiz.firebasestorage.app",
+  messagingSenderId: "901691269194",
+  appId: "1:901691269194:web:5c9acd21dae296f4b746b3"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const gameRef    = db.ref('game');
+const playersRef = db.ref('players');
+const answersRef = db.ref('answers');
+
+const MAIN_QUESTIONS = [
+  { q: "What country was Ridwan born in?", opts: ["USA", "Bangladesh", "Sweden", "Finland"], ans: 2, tier: "easy" },
+  { q: "Which New York borough did Ridwan live in first?", opts: ["Brooklyn", "The Bronx", "Manhattan", "Queens"], ans: 3, tier: "easy" },
+  { q: "What is Ridwan's all-time favorite TV show?", opts: ["Game of Thrones", "Friends", "Breaking Bad", "Succession"], ans: 2, tier: "easy" },
+  { q: "Which football club does Ridwan support?", opts: ["Arsenal", "Liverpool", "Manchester United", "Chelsea FC"], ans: 3, tier: "easy" },
+  { q: "What is Ridwan's drink of choice?", opts: ["Sparkling water", "Sprite Zero", "Coke Zero", "Iced tea"], ans: 2, tier: "easy" },
+  { q: "What anime was Ridwan obsessed with growing up?", opts: ["Naruto", "One Piece", "Dragon Ball", "Yu-Gi-Oh"], ans: 2, tier: "medium" },
+  { q: "What was Ridwan's all-time favorite video game growing up?", opts: ["Call of Duty", "FIFA", "Madden", "NBA 2K"], ans: 1, tier: "medium" },
+  { q: "What is Ridwan's biggest pet peeve?", opts: ["People being late", "Nail biting", "Loud chewing", "Spoilers"], ans: 1, tier: "medium" },
+  { q: "What was Ridwan's first car?", opts: ["Honda Civic", "Toyota Camry", "Nissan Altima", "Ford Focus"], ans: 2, tier: "medium" },
+  { q: "Ridwan is a recent F1 fan — who is his favorite driver?", opts: ["Lewis Hamilton", "Charles Leclerc", "Max Verstappen", "Carlos Sainz"], ans: 2, tier: "medium" },
+  { q: "What does Ridwan love splurging on?", opts: ["Food delivery apps", "Random tech gadgets", "Travel upgrades", "New clothes"], ans: 1, tier: "hard" },
+  { q: "What is Ridwan's second favorite TV show after Breaking Bad?", opts: ["The Bear", "Schitt's Creek", "Abbott Elementary", "Ted Lasso"], ans: 3, tier: "hard" },
+  { q: "Ridwan barely reads — but one book got him back into it. What was it?", opts: ["The Martian", "Project Hail Mary", "Dune", "Dark Matter"], ans: 3, tier: "hard" },
+  { q: "What is Ridwan genuinely scared of?", opts: ["Clowns in the dark", "Flying on planes", "Animals touching him", "Crowded elevators"], ans: 2, tier: "hard" },
+  { q: "What does Ridwan do for an hour every weekend morning after waking up?", opts: ["Make breakfast", "Doom scroll", "Work out", "Watch TV"], ans: 1, tier: "hard" },
+  { q: "What nickname did Ridwan's 6th grade English teacher give him?", opts: ["Ricky", "Moo-Moo", "Dwan", "R-Man"], ans: 1, tier: "chaos" },
+  { q: "What is Ridwan's Discord group called?", opts: ["Toilet Boyz Inc", "Glock Dookie", "Stinky Penguin Gang", "Wet Sock Society"], ans: 1, tier: "chaos" },
+  { q: "Which unexpected song is one of Ridwan's secret favorites?", opts: ["Love Story by Taylor Swift", "Unfaithful by Rihanna", "Love On Top by Beyonce", "Find Your Love by Drake"], ans: 1, tier: "chaos" },
+  { q: "What does Ridwan find absolutely disgusting?", opts: ["Broccoli", "Tomatoes", "Cucumber", "Spinach"], ans: 2, tier: "chaos" },
+  { q: "Ridwan once destroyed someone's expensive camera equipment. How?", opts: ["Dropped it in a pool", "Sat on it", "Put it in the microwave", "Threw it by accident"], ans: 2, tier: "chaos" },
+];
+
+const BONUS_QUESTIONS = [
+  { q: "Ridwan walks into a bar and the music is deafening. What does he do?", opts: ["Asks them to turn it down", "Leaves immediately", "Suffers in silence", "Starts dancing anyway"], ans: 1, tier: "bonus" },
+  { q: "What is Ridwan's phone wallpaper?", opts: ["A Chelsea FC photo", "A sunset from Dubai", "A shot from Project Hail Mary", "Believe sign from Ted Lasso"], ans: 2, tier: "bonus" },
+  { q: "What is Ridwan's favorite cake flavor?", opts: ["Chocolate", "Vanilla", "Carrot", "Red velvet"], ans: 3, tier: "bonus" },
+];
+
+const ALL_QUESTIONS = [...MAIN_QUESTIONS, ...BONUS_QUESTIONS];
+const POINTS_PER_Q   = 100;
+const BONUS_MULTIPLIER = 2;
+const OPT_LABELS = ["A", "B", "C", "D"];
+
+let myName   = "";
+let currentQ = 0;
+let myScore  = 0;
+let myAnswer = null;
+let revealed = false;
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + id).classList.add('active');
+}
+
+function joinGame() {
+  const name = document.getElementById('player-name').value.trim();
+  if (!name) return alert("Please enter your name!");
+  myName = name;
+  playersRef.child(name.replace(/[.#$/[\]]/g, '_')).set({ name, score: 0, joined: Date.now() });
+  showScreen('waiting');
+  document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
+  listenForPlayers();
+  listenForGameState();
+}
+
+function listenForPlayers() {
+  playersRef.on('value', snap => {
+    const players = snap.val() || {};
+    const grid = document.getElementById('player-grid');
+    if (!grid) return;
+    grid.innerHTML = '';
+    Object.values(players).forEach(p => {
+      const chip = document.createElement('div');
+      chip.className = 'player-chip';
+      chip.textContent = p.name;
+      grid.appendChild(chip);
+    });
+  });
+}
+
+function listenForGameState() {
+  gameRef.on('value', snap => {
+    const state = snap.val();
+    if (!state) return;
+    currentQ = state.currentQ || 0;
+    if (!ALL_QUESTIONS[currentQ]) return;
+
+    if (state.phase === 'question') {
+      myAnswer = null;
+      revealed = false;
+      showAnswerScreen(currentQ);
+    } else if (state.phase === 'revealed') {
+      revealed = true;
+      showRevealedScreen(currentQ);
+    } else if (state.phase === 'leaderboard') {
+      showScreen('answered');
+      document.getElementById('answered-result').textContent = "Check the big screen!";
+      document.getElementById('answered-sub').textContent = "Podium time 🏆";
+      document.getElementById('result-badge').textContent = "⏳";
+      document.getElementById('result-badge').className = 'result-badge';
+      document.getElementById('my-score').textContent = myScore;
+    } else if (state.phase === 'end') {
+      showEndScreen();
+    }
+  });
+}
+
+function showAnswerScreen(qIndex) {
+  const q = ALL_QUESTIONS[qIndex];
+  document.getElementById('answer-q-num').textContent = qIndex < MAIN_QUESTIONS.length
+    ? `QUESTION ${qIndex + 1} OF 20`
+    : `TURBO ROUND ${qIndex - MAIN_QUESTIONS.length + 1}`;
+  document.getElementById('answer-q-text').textContent = q.q;
+  const opts = document.getElementById('answer-options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'answer-btn';
+    btn.textContent = OPT_LABELS[i] + ') ' + o;
+    btn.onclick = () => submitAnswer(i, btn);
+    opts.appendChild(btn);
+  });
+  showScreen('answer');
+}
+
+function submitAnswer(i, btn) {
+  if (myAnswer !== null) return;
+  myAnswer = i;
+  document.querySelectorAll('.answer-btn').forEach(b => { b.disabled = true; b.classList.remove('selected'); });
+  btn.classList.add('selected');
+  const key = myName.replace(/[.#$/[\]]/g, '_');
+  answersRef.child(currentQ).child(key).set({ name: myName, answer: i });
+  showScreen('answered');
+  document.getElementById('answered-result').textContent = "Answer locked in!";
+  document.getElementById('answered-sub').textContent = "Waiting for host to reveal...";
+  document.getElementById('result-badge').textContent = "Locked in!";
+  document.getElementById('result-badge').className = 'result-badge';
+  document.getElementById('my-score').textContent = myScore;
+  if (revealed) showRevealedScreen(currentQ);
+}
+
+function showRevealedScreen(qIndex) {
+  const q = ALL_QUESTIONS[qIndex];
+  const isBonus = qIndex >= MAIN_QUESTIONS.length;
+  const pts = isBonus ? POINTS_PER_Q * BONUS_MULTIPLIER : POINTS_PER_Q;
+  const correct = myAnswer === q.ans;
+  if (correct) {
+    myScore += pts;
+    playersRef.child(myName.replace(/[.#$/[\]]/g, '_')).update({ score: myScore });
+  }
+  showScreen('answered');
+  document.getElementById('answered-result').textContent = correct
+    ? (isBonus ? `+${pts} pts — TURBO BOOST!` : `+${pts} points!`)
+    : "Not quite!";
+  document.getElementById('answered-sub').textContent = correct ? "Correct! 🎉" : `The answer was: ${q.opts[q.ans]}`;
+  document.getElementById('result-badge').textContent = correct ? "✓ Correct!" : "✗ Wrong";
+  document.getElementById('result-badge').className = 'result-badge ' + (correct ? 'result-correct' : 'result-wrong');
+  document.getElementById('my-score').textContent = myScore;
+}
+
+function showEndScreen() {
+  showScreen('end');
+  playersRef.orderByChild('score').once('value', snap => {
+    const players = [];
+    snap.forEach(child => players.push(child.val()));
+    players.sort((a, b) => b.score - a.score);
+    const list = document.getElementById('final-lb');
+    list.innerHTML = '';
+    const medals = ['🥇', '🥈', '🥉'];
+    players.slice(0, 10).forEach((p, i) => {
+      const row = document.createElement('div');
+      row.className = 'lb-row' + (i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '');
+      row.innerHTML = `<div class="lb-rank">${medals[i] || 'P' + (i + 1)}</div><div class="lb-name">${p.name}</div><div class="lb-score">${p.score} PTS</div>`;
+      list.appendChild(row);
+    });
+  });
+}
+
+document.getElementById('player-name').addEventListener('keydown', e => { if (e.key === 'Enter') joinGame(); });
+</script>
+</body>
+</html>
