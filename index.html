@@ -486,7 +486,6 @@ function sortPlayers(players) {
 }
 
 function buildLbRows(players, containerId) {
-  console.log('buildLbRows:', containerId, players.length, 'players', JSON.stringify(players.map(p=>({n:p.name,s:p.score}))));
   const list = document.getElementById(containerId);
   list.innerHTML = '';
   const leaderScore = players.length ? Number(players[0].score) : 0;
@@ -514,7 +513,6 @@ function showLeaderboard() {
       const val = child.val();
       if (val && val.name) players.push(val); // guard against null/malformed entries
     });
-    console.log('lb snap children:', players.length);
     buildLbRows(sortPlayers(players), 'lb-list');
   });
 }
