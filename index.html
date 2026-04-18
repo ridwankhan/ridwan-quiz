@@ -679,6 +679,7 @@ function nextQuestion() {
 
 function continueFromLeaderboard() {
   currentQ++;
+  showScreen('host');
   renderHostQuestion();
 }
 
@@ -686,7 +687,7 @@ function buildLbRows(players, containerId) {
   const list = document.getElementById(containerId);
   list.innerHTML = '';
   const leader = players[0] ? players[0].score : 0;
-  players.slice(0, 10).forEach((p, i) => {
+  players.slice(0, 35).forEach((p, i) => {
     const cls = i === 0 ? ' top1' : i === 1 ? ' top2' : i === 2 ? ' top3' : '';
     const gap = i === 0 ? 'LEADER' : '-' + (leader - p.score) + ' PTS';
     const row = document.createElement('div');
