@@ -301,8 +301,9 @@ function joinGame() {
 }
 
 function goHost() {
+  const force = new URLSearchParams(location.search).has('forceHost');
   db.ref('game/hostActive').once('value', snap => {
-    if (snap.val()) {
+    if (snap.val() && !force) {
       document.getElementById('host-taken-msg').style.display = 'block';
       return;
     }
