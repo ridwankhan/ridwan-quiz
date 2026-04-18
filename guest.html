@@ -363,6 +363,8 @@ function listenForGameState() {
       showAnswerScreen(currentQ);
     } else if (state.phase === 'revealed') {
       revealed = true;
+      // Skip reveal display if guest never got to answer this question
+      if (myAnswer === null && !allowAnswering) return;
       showRevealedScreen(currentQ);
     } else if (state.phase === 'leaderboard') {
       showScreen('answered');

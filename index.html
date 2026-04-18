@@ -429,7 +429,9 @@ function renderHostQuestion() {
     opts.appendChild(btn);
   });
 
-  document.getElementById('reveal-btn').style.display = 'block';
+  const revealBtn = document.getElementById('reveal-btn');
+  revealBtn.style.display = 'block';
+  revealBtn.disabled = false;
   document.getElementById('next-btn').style.display = 'none';
   document.getElementById('host-answers-count').textContent = '0 PLAYERS ANSWERED';
 
