@@ -279,7 +279,8 @@ let revealed = false;
 let scoredForQ      = -1;
 let gameListener    = null;
 let playersListener = null;
-let allowAnswering  = false; // true once guest is synced to the game flow
+let allowAnswering  = false;
+let hasJoined       = false; // true after first successful join; guards against reset handler firing on initial 'waiting' state
 
 function showScreen(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -301,6 +302,7 @@ function joinGame() {
     gameRef.once('value', gameSnap => {
       const state = gameSnap.val();
       allowAnswering = !state || state.phase === 'waiting';
+      hasJoined = true;
       showScreen('waiting');
       document.getElementById('waiting-name').textContent = "Hey, " + name + "!";
       listenForPlayers();
@@ -333,9 +335,11 @@ function listenForGameState() {
     currentQ = state.currentQ || 0;
 
     if (state.phase === 'waiting') {
-      // Host reset — clear state and send back to join screen
+      // Only treat 'waiting' as a reset if the player has already been in the game
+      // (prevents initial join from being bounced back to join screen)
+      if (!hasJoined) return;
       myName = ''; myScore = 0; myAnswer = null; revealed = false;
-      scoredForQ = -1; allowAnswering = false;
+      scoredForQ = -1; allowAnswering = false; hasJoined = false;
       if (gameListener)    { gameRef.off('value', gameListener);      gameListener = null; }
       if (playersListener) { playersRef.off('value', playersListener); playersListener = null; }
       showScreen('join');
