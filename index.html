@@ -203,7 +203,7 @@
       <div class="player-count" id="lobby-player-count">0 DRIVERS ON GRID</div>
       <div class="player-grid" id="lobby-player-grid"></div>
       <button class="btn btn-red" onclick="startGame()">Start Game</button>
-      <button id="resume-btn" class="btn btn-outline" onclick="resumeGame()" style="display:none;margin-top:10px;"></button>
+
       <button class="btn btn-outline" onclick="resetGame()" style="margin-top:10px;font-size:13px;padding:10px;">↺ Reset</button>
     </div>
   </div>
@@ -365,15 +365,14 @@ playersRef.on('value', snap => {
   if (count) count.textContent = vals.length + ' DRIVER' + (vals.length !== 1 ? 'S' : '') + ' ON GRID';
 });
 
-// On load: check if a game is already in progress so host can resume
+// On load: auto-resume if a game is already in progress
 gameRef.once('value', snap => {
   const state = snap.val();
   if (state && state.phase && state.phase !== 'waiting' && state.currentQ != null) {
-    const resumeBtn = document.getElementById('resume-btn');
-    const qNum = Number(state.currentQ) + 1;
-    resumeBtn.textContent = `↩ Resume from Q${qNum}`;
-    resumeBtn.style.display = 'block';
     currentQ = Number(state.currentQ);
+    showScreen('host');
+    renderHostQuestion();
+    listenForAnswers();
   }
 });
 
